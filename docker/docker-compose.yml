@@ -1,0 +1,49 @@
+version: "3"
+
+services:
+  docker-server:
+    image: docker-echo-server
+    restart: unless-stopped
+    build:
+      context: ./server
+    networks:
+      - echo-network
+  docker-client1:
+    image: docker-echo-client
+    build:
+      context: ./client
+    depends_on:
+      - docker-server
+    environment:
+      - TARGET_SERVER_ADDRESS=http://docker-server:8080
+      - NUM_THREADS=300
+      - NUM_SECONDS=300
+    networks:
+      - echo-network
+  docker-client2:
+    image: docker-echo-client
+    build:
+      context: ./client
+    depends_on:
+      - docker-server
+    environment:
+      - TARGET_SERVER_ADDRESS=http://docker-server:8080
+      - NUM_THREADS=100
+      - NUM_SECONDS=100
+    networks:
+      - echo-network
+  docker-client3:
+    image: docker-echo-client
+    build:
+      context: ./client
+    depends_on:
+      - docker-server
+    environment:
+      - TARGET_SERVER_ADDRESS=http://docker-server:8080
+      - NUM_THREADS=200
+      - NUM_SECONDS=200
+    networks:
+      - echo-network
+networks:
+  echo-network:
+    driver: bridge
