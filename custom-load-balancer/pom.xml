@@ -1,15 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.jerkic.custom-load-balancer</groupId>
     <artifactId>custom-load-balancer</artifactId>
-    <packaging>pom</packaging>
-
     <version>1.0-SNAPSHOT</version>
+
+    <packaging>pom</packaging>
     <name>custom-load-balancer</name>
-    <url>http://maven.apache.org</url>
 
     <properties>
         <java.version>23</java.version>
@@ -19,6 +20,7 @@
         <module>discovery-server</module>
         <module>shared</module>
         <module>client</module>
+        <module>examples</module>
     </modules>
 
 </project>
