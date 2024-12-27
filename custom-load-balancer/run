@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+trap "kill 0" EXIT
+modules=("discovery-server" "examples/example-server-1")
+
+for module in "${modules[@]}"
+do
+  ./mvnw spring-boot:run -pl $module & # Run in background
+done
+
+wait # Wait for all to finish
+
