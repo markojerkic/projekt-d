@@ -7,11 +7,13 @@ import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ClientHealthService implements ServiceHealthService {
   private final ClientProperties clientProperties;
   private final RestTemplate restTemplate = new RestTemplate();
@@ -19,6 +21,9 @@ public class ClientHealthService implements ServiceHealthService {
 
   @Override
   public String registerService(RegisterInput registerInput) {
+    log.info(
+        "Registering service with discovery server at {}",
+        this.clientProperties.getDiscoveryServerUrl() + "/register");
     var serviceId =
         this.restTemplate.postForObject(
             this.clientProperties.getDiscoveryServerUrl() + "/register",
@@ -31,6 +36,8 @@ public class ClientHealthService implements ServiceHealthService {
 
   @Override
   public void updateHealth(HealthUpdateInput healthUpdateInput) {
+    log.info(
+        "Updating health to addr {}", this.clientProperties.getDiscoveryServerUrl() + "/health");
     this.restTemplate.postForObject(
         this.clientProperties.getDiscoveryServerUrl() + "/health", healthUpdateInput, Void.class);
   }

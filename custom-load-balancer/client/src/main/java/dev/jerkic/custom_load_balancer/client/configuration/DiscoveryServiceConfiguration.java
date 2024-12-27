@@ -164,7 +164,7 @@ public class DiscoveryServiceConfiguration {
     Map<String, Object> threadMetrics = new HashMap<>();
 
     ObjectName objectName = new ObjectName("Tomcat:type=ThreadPool,name=\"http-nio-8080\"");
-    MBeanServer mBeanServer = Registry.getRegistry(null, null).getMBeanServer();
+    var mBeanServer = Registry.getRegistry(null, null).getMBeanServer();
 
     AttributeList attributes =
         mBeanServer.getAttributes(
