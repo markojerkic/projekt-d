@@ -9,11 +9,13 @@ import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@Slf4j
 public class ServiceManagement implements ServiceHealthService {
   private final ConcurrentHashMap<String, ConcurrentHashMap<String, ServiceInfo>> services =
       new ConcurrentHashMap<>();
@@ -39,24 +41,33 @@ public class ServiceManagement implements ServiceHealthService {
             .build());
 
     health.put(serviceId, healthList);
+
+    log.info("Registered service {} with id {}", serviceInfo.getServiceName(), serviceId);
+
     return serviceId;
   }
 
   @Override
   public void updateHealth(HealthUpdateInput healthUpdateInput) {
-    var serviceId = this.services.get(healthUpdateInput.getServiceId());
-    if (serviceId == null) {
+    var serviceIds = this.services.get(healthUpdateInput.getServiceId());
+    if (serviceIds == null) {
       throw new ResponseStatusException(
-          HttpStatus.NOT_FOUND, String.format("Service with id '%s' not found", serviceId));
+          HttpStatus.NOT_FOUND, String.format("Service with id '%s' not found", serviceIds));
     }
 
-    health.get(healthUpdateInput.getServiceId()).add(healthUpdateInput.getHealth());
+    this.health.get(healthUpdateInput.getServiceId()).add(healthUpdateInput.getHealth());
 
     // Clean up old health records
-    var healthList = health.get(healthUpdateInput.getServiceId());
+    var healthList = this.health.get(healthUpdateInput.getServiceId());
     var now = java.time.Instant.now();
     if (healthList.size() > 10) {
       healthList.removeIf(health -> health.getTimestamp().isBefore(now.minusSeconds(60)));
     }
+
+    log.info(
+        "Updated health for service {} with id {} - {}",
+        this.health.get(healthUpdateInput.getServiceId()).pollFirst().getServiceName(),
+        healthUpdateInput.getServiceId(),
+        healthUpdateInput);
   }
 }
