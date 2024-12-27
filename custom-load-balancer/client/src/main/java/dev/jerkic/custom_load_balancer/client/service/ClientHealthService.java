@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class ClientHealthService implements ServiceHealthService {
   private final ClientProperties clientProperties;
-  private final RestTemplate restTemplate;
+  private final RestTemplate restTemplate = new RestTemplate();
   private final AtomicReference<String> serviceId = new AtomicReference<>();
 
   @Override
