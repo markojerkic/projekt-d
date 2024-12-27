@@ -10,6 +10,7 @@ import jakarta.annotation.PostConstruct;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -26,6 +27,8 @@ public class DiscoveryServiceConfiguration {
   private static final double THREAD_USAGE_THRESHOLD = 0.85;
   private static final double MEMORY_USAGE_THRESHOLD = 0.90;
 
+  private final ServerProperties serverProperties;
+
   private final ClientHealthService clientHealthService;
   private final ClientProperties clientProperties;
 
@@ -39,7 +42,8 @@ public class DiscoveryServiceConfiguration {
             .build();
 
     log.info("Registering server with service discovery with input: {}", registerInput);
-    this.clientHealthService.registerService(registerInput);
+    var serviceId = this.clientHealthService.registerService(registerInput);
+    log.info("Registered service, id is {}", serviceId);
   }
 
   // Define cron job for every 1 min
@@ -87,6 +91,6 @@ public class DiscoveryServiceConfiguration {
    * @return String host:port
    */
   private String getCurrentServerAddress() {
-    return "8080";
+    return String.valueOf(this.serverProperties.getPort());
   }
 }
