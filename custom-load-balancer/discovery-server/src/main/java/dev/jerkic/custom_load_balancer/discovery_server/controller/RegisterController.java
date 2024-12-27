@@ -1,6 +1,6 @@
 package dev.jerkic.custom_load_balancer.discovery_server.controller;
 
-import dev.jerkic.custom_load_balancer.discovery_server.model.dto.ServiceInfo;
+import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
