@@ -17,8 +17,10 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @Slf4j
 public class ServiceManagement implements ServiceHealthService {
+  // Map of service name to service id to service info
   private final ConcurrentHashMap<String, ConcurrentHashMap<String, ServiceInfo>> services =
       new ConcurrentHashMap<>();
+  // Map of service id to health records
   private final ConcurrentHashMap<String, ConcurrentSkipListSet<ServiceHealthInput>> health =
       new ConcurrentHashMap<>();
 
@@ -49,7 +51,9 @@ public class ServiceManagement implements ServiceHealthService {
 
   @Override
   public void updateHealth(HealthUpdateInput healthUpdateInput) {
-    var serviceIds = this.services.get(healthUpdateInput.getServiceId());
+    var serviceName =
+        this.health.get(healthUpdateInput.getServiceId()).pollFirst().getServiceName();
+    var serviceIds = this.services.get(serviceName);
     if (serviceIds == null) {
       throw new ResponseStatusException(
           HttpStatus.NOT_FOUND, String.format("Service with id '%s' not found", serviceIds));
