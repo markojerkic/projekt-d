@@ -15,7 +15,10 @@ public class TcpConnectionCounter implements TomcatConnectorCustomizer {
   public void customize(Connector connector) {
     connector.addLifecycleListener(
         event -> {
-          log.info("Tomcat connection event: {}", event);
+          log.info(
+              "Tomcat connection event: type= {}, lifecycle= {}",
+              event.getType(),
+              event.getLifecycle());
         });
   }
 }
