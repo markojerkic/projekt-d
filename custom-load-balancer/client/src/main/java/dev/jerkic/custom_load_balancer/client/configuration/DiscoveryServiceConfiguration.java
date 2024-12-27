@@ -1,5 +1,6 @@
 package dev.jerkic.custom_load_balancer.client.configuration;
 
+import dev.jerkic.custom_load_balancer.client.properties.ClientProperties;
 import dev.jerkic.custom_load_balancer.client.service.ClientHealthService;
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceHealthInput;
@@ -17,6 +18,7 @@ import javax.management.ReflectionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.modeler.Registry;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -25,6 +27,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 @Configuration
 @RequiredArgsConstructor
 @EnableScheduling
+@EnableConfigurationProperties(ClientProperties.class)
 @Slf4j
 public class DiscoveryServiceConfiguration {
   // Threshold for threads. If less than 85% of threads are available, service is considered
@@ -33,6 +36,7 @@ public class DiscoveryServiceConfiguration {
   private static final double MEMORY_USAGE_THRESHOLD = 0.90;
 
   private final ClientHealthService clientHealthService;
+  private final ClientProperties clientProperties;
   private final ServletWebServerApplicationContext server;
 
   // Define cron job for every 1 min
@@ -52,11 +56,12 @@ public class DiscoveryServiceConfiguration {
   }
 
   private ServiceHealthInput getServiceHealth() {
-    var serviceHealthBuilder =
-        ServiceHealthInput.builder()
-            .timestamp(Instant.now())
-            .isHealthy
-            .numberOfConnections(this.getCurrentNumberOfConnections());
+    return ServiceHealthInput.builder()
+        .serviceName(this.clientProperties.getServiceName())
+        .timestamp(Instant.now())
+        .isHealthy(this.isHealthy())
+        .numberOfConnections(this.getCurrentNumberOfConnections())
+        .build();
   }
 
   /**

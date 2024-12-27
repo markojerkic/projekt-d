@@ -7,12 +7,10 @@ import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-@EnableConfigurationProperties(ClientProperties.class)
 @RequiredArgsConstructor
 public class ClientHealthService implements ServiceHealthService {
   private final ClientProperties clientProperties;
