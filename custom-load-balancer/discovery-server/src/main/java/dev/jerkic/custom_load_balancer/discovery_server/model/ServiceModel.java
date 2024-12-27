@@ -17,7 +17,7 @@ import org.springframework.data.redis.core.RedisHash;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Service {
+public class ServiceModel {
   @Id private String id;
   private String serviceName;
   // Collection of service instances
