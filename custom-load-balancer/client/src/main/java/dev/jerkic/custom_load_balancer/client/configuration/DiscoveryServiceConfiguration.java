@@ -57,7 +57,11 @@ public class DiscoveryServiceConfiguration {
     var serviceId = oServiceId.get();
 
     var healthStatus =
-        HealthUpdateInput.builder().serviceId(serviceId).health(this.getServiceHealth()).build();
+        HealthUpdateInput.builder()
+            .serviceId(serviceId)
+            .serviceName(this.clientProperties.getServiceName())
+            .health(this.getServiceHealth())
+            .build();
 
     log.info("Updating health: {}", healthStatus);
 

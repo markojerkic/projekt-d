@@ -51,9 +51,7 @@ public class ServiceManagement implements ServiceHealthService {
 
   @Override
   public void updateHealth(HealthUpdateInput healthUpdateInput) {
-    var serviceName =
-        this.health.get(healthUpdateInput.getServiceId()).pollFirst().getServiceName();
-    var serviceIds = this.services.get(serviceName);
+    var serviceIds = this.services.get(healthUpdateInput.getServiceName());
     if (serviceIds == null) {
       throw new ResponseStatusException(
           HttpStatus.NOT_FOUND, String.format("Service with id '%s' not found", serviceIds));

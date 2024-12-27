@@ -7,5 +7,6 @@ import lombok.Data;
 @Builder
 public class HealthUpdateInput {
   private String serviceId;
+  private String serviceName;
   private ServiceHealthInput health;
 }
