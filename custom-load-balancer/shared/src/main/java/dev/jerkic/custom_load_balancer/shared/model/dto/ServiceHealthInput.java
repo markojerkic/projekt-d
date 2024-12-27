@@ -7,8 +7,8 @@ import lombok.Data;
 @Data
 @Builder
 public class ServiceHealthInput {
-  private final String serviceName;
-  private final boolean isHealthy;
-  private final Long numberOfConnections;
-  private final Instant timestamp;
+  private String serviceName;
+  private boolean isHealthy;
+  private Long numberOfConnections;
+  private Instant timestamp;
 }

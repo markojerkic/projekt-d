@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class ServiceInfo {
-  private final String serviceName;
-  private final String serviceAddress;
-  private final String serviceHealthCheckUrl;
+  private String serviceName;
+  private String serviceAddress;
+  private String serviceHealthCheckUrl;
 }

@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class RegisterInput {
-  private final ServiceHealthInput serviceHealth;
-  private final ServiceInfo serviceInfo;
+  private ServiceHealthInput serviceHealth;
+  private ServiceInfo serviceInfo;
 }

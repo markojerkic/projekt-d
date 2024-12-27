@@ -59,6 +59,8 @@ public class DiscoveryServiceConfiguration {
     var healthStatus =
         HealthUpdateInput.builder().serviceId(serviceId).health(this.getServiceHealth()).build();
 
+    log.info("Updating health: {}", healthStatus);
+
     this.clientHealthService.updateHealth(healthStatus);
   }
 
