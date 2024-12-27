@@ -10,9 +10,9 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>dev.jerkic.custom-load-balancer</groupId>
-    <artifactId>discovery-server</artifactId>
+    <artifactId>shared</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>discovery-server</name>
+    <name>shared</name>
     <description>Discovery server for custom load balancer</description>
     <url />
     <licenses>
@@ -33,16 +33,7 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.wimdeblauwe</groupId>
-            <artifactId>htmx-spring-boot-thymeleaf</artifactId>
-            <version>4.0.1</version>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
         <dependency>
@@ -69,6 +60,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
+                    <excludeDevtools>false</excludeDevtools>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -81,8 +73,8 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <excludeDevtools>false</excludeDevtools>
                     <excludes>
+                        <excludeDevtools>false</excludeDevtools>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>

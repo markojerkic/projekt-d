@@ -17,6 +17,7 @@
 
     <modules>
         <module>discovery-server</module>
+        <module>shared</module>
     </modules>
 
 </project>

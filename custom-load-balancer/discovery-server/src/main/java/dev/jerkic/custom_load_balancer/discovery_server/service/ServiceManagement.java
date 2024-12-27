@@ -59,5 +59,12 @@ public class ServiceManagement {
     }
 
     health.get(healthUpdateInput.getServiceId()).add(healthUpdateInput.getHealth());
+
+    // Clean up old health records
+    var healthList = health.get(healthUpdateInput.getServiceId());
+    var now = java.time.Instant.now();
+    if (healthList.size() > 10) {
+      healthList.removeIf(health -> health.getTimestamp().isBefore(now.minusSeconds(60)));
+    }
   }
 }
