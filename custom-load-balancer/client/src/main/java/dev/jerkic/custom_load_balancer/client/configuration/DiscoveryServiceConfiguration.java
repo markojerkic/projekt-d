@@ -3,7 +3,10 @@ package dev.jerkic.custom_load_balancer.client.configuration;
 import dev.jerkic.custom_load_balancer.client.properties.ClientProperties;
 import dev.jerkic.custom_load_balancer.client.service.ClientHealthService;
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
+import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceHealthInput;
+import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceInfo;
+import jakarta.annotation.PostConstruct;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.time.Instant;
@@ -39,6 +42,18 @@ public class DiscoveryServiceConfiguration {
   private final ClientProperties clientProperties;
   private final ServletWebServerApplicationContext server;
 
+  /** Register on every startup of server */
+  @PostConstruct
+  public void register() {
+    var registerInput = RegisterInput.builder()
+      .serviceInfo(this.getServiceInfo())
+      .serviceHealth(this.getServiceHealth())
+      .build();
+
+    log.info("Registering server with service discovery with input: {}", registerInput);
+    this.clientHealthService.registerService(registerInput    );
+  }
+
   // Define cron job for every 1 min
   @Scheduled(fixedRate = 60000)
   public void updateHealth() {
@@ -55,6 +70,20 @@ public class DiscoveryServiceConfiguration {
     this.clientHealthService.updateHealth(healthStatus);
   }
 
+  private final ServiceInfo getServiceInfo() {
+    return ServiceInfo.builder()
+    .serviceName(this.clientProperties.getServiceName())
+    .serviceHealthCheckUrl("/health")
+    .serviceAddress(this.getCurrentServerAddress())
+    .build();
+  }
+
+  /**
+   * Get service health. This method checks if service is healthy and returns ServiceHealthInput
+   * object
+   *
+   * @return ServiceHealthInput object
+   */
   private ServiceHealthInput getServiceHealth() {
     return ServiceHealthInput.builder()
         .serviceName(this.clientProperties.getServiceName())
@@ -62,6 +91,15 @@ public class DiscoveryServiceConfiguration {
         .isHealthy(this.isHealthy())
         .numberOfConnections(this.getCurrentNumberOfConnections())
         .build();
+  }
+
+  /**
+   * Get address of current server
+   *
+   * @return String host:port
+   */
+  private String getCurrentServerAddress() {
+    return String.valueOf( this.server.getWebServer().getPort());
   }
 
   /**
