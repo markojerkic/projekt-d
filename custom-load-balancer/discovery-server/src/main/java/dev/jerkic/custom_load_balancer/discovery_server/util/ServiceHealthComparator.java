@@ -1,6 +1,6 @@
 package dev.jerkic.custom_load_balancer.discovery_server.util;
 
-import dev.jerkic.custom_load_balancer.discovery_server.model.dto.ServiceHealthInput;
+import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceHealthInput;
 import java.util.Comparator;
 
 public class ServiceHealthComparator implements Comparator<ServiceHealthInput> {

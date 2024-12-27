@@ -1,10 +1,11 @@
 package dev.jerkic.custom_load_balancer.discovery_server.service;
 
-import dev.jerkic.custom_load_balancer.discovery_server.model.dto.HealthUpdateInput;
-import dev.jerkic.custom_load_balancer.discovery_server.model.dto.RegisterInput;
-import dev.jerkic.custom_load_balancer.discovery_server.model.dto.ServiceHealthInput;
-import dev.jerkic.custom_load_balancer.discovery_server.model.dto.ServiceInfo;
 import dev.jerkic.custom_load_balancer.discovery_server.util.ServiceHealthComparator;
+import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
+import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
+import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceHealthInput;
+import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceInfo;
+import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -13,18 +14,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
-public class ServiceManagement {
+public class ServiceManagement implements ServiceHealthService {
   private final ConcurrentHashMap<String, ConcurrentHashMap<String, ServiceInfo>> services =
       new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, ConcurrentSkipListSet<ServiceHealthInput>> health =
       new ConcurrentHashMap<>();
 
-  /**
-   * Registers a service with the discovery server.
-   *
-   * @param registerInput The service to register.
-   * @return The id of the registered service. Used to update the health of the service.
-   */
+  @Override
   public String registerService(RegisterInput registerInput) {
     var serviceInfo = registerInput.getServiceInfo();
 
@@ -46,11 +42,7 @@ public class ServiceManagement {
     return serviceId;
   }
 
-  /**
-   * Updates the health of a service.
-   *
-   * @param healthUpdateInput The health update input.
-   */
+  @Override
   public void updateHealth(HealthUpdateInput healthUpdateInput) {
     var serviceId = this.services.get(healthUpdateInput.getServiceId());
     if (serviceId == null) {

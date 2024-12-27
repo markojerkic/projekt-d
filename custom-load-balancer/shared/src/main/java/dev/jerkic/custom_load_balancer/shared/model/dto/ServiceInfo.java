@@ -1,4 +1,4 @@
-package dev.jerkic.custom_load_balancer.discovery_server.model.dto;
+package dev.jerkic.custom_load_balancer.shared.model.dto;
 
 import lombok.Data;
 
