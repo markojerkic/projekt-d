@@ -9,6 +9,8 @@ import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceInfo;
 import jakarta.annotation.PostConstruct;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
+import java.lang.management.ThreadMXBean;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +22,10 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.catalina.connector.Connector;
+import org.apache.catalina.core.StandardServer;
+import org.apache.catalina.core.StandardService;
 import org.apache.tomcat.util.modeler.Registry;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
@@ -40,6 +46,8 @@ public class DiscoveryServiceConfiguration {
 
   private final ClientHealthService clientHealthService;
   private final ClientProperties clientProperties;
+  private final StandardServer standardServer = new StandardServer();
+
   private final ServletWebServerApplicationContext server;
 
   /** Register on every startup of server */
@@ -88,8 +96,8 @@ public class DiscoveryServiceConfiguration {
     return ServiceHealthInput.builder()
         .serviceName(this.clientProperties.getServiceName())
         .timestamp(Instant.now())
-        .isHealthy(this.isHealthy())
-        .numberOfConnections(this.getCurrentNumberOfConnections())
+        .isHealthy(true)
+        .numberOfConnections(0l)
         .build();
   }
 
@@ -108,16 +116,18 @@ public class DiscoveryServiceConfiguration {
    * @return number of open connections or -1 if error occurred
    */
   private long getCurrentNumberOfConnections() {
-    try {
-      var threadMetrics = this.getThreadMetrics();
+      StandardService service = (StandardService) standardServer.findService("Catalina");
+        Connector[] connectors = service.findConnectors();
 
-      var currentThreadCount = (int) threadMetrics.get("currentThreadCount");
-      var currentThreadsBusy = (int) threadMetrics.get("currentThreadsBusy");
-      return currentThreadCount - currentThreadsBusy;
-    } catch (MalformedObjectNameException | InstanceNotFoundException | ReflectionException e) {
-      log.error("Error while getting current number of connections", e);
-    }
-    return -1;
+        int activeConnections = 0;
+        for (Connector connector : connectors) {
+            // Access the ProtocolHandler and retrieve connection stats
+            if (connector.getProtocolHandler() != null) {
+                activeConnections += ((org.apache.coyote.AbstractProtocol<?>) connector.getProtocolHandler()).getConnectionCount();
+            }
+        }
+        return activeConnections;
+
   }
 
   /**
@@ -126,74 +136,45 @@ public class DiscoveryServiceConfiguration {
    * @return true if service is healthy, false otherwise
    */
   private boolean isHealthy() {
+    return this.isThreadHealthy() && this.isMemoryHealthy();
+  }
+
+  private boolean isMemoryHealthy() {
     try {
-      // Check thread health
-      Map<String, Object> threadMetrics = this.getThreadMetrics();
-      int busyThreads = (int) threadMetrics.get("currentThreadsBusy");
-      int maxThreads = (int) threadMetrics.get("maxThreads");
-      double threadUsageRatio = (double) busyThreads / maxThreads;
-      if (threadUsageRatio > THREAD_USAGE_THRESHOLD) {
-        return false;
-      }
+        // Using ManagementFactory to get memory usage information
+        MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+        MemoryUsage heapMemoryUsage = memoryMXBean.getHeapMemoryUsage();
+        long usedMemory = heapMemoryUsage.getUsed();
+        long maxMemory = heapMemoryUsage.getMax();
+        double memoryUsageRatio = (double) usedMemory / maxMemory;
 
-      // Check memory health
-      Map<String, Object> memoryMetrics = this.getMemoryMetrics();
-      long usedMemory = (long) memoryMetrics.get("heapMemoryUsed");
-      long maxMemory = (long) memoryMetrics.get("heapMemoryMax");
-      double memoryUsageRatio = (double) usedMemory / maxMemory;
-      if (memoryUsageRatio > MEMORY_USAGE_THRESHOLD) {
-        return false;
-      }
-
-      // Additional health checks could be added here
-
-      return true;
+        return memoryUsageRatio <= MEMORY_USAGE_THRESHOLD;
     } catch (Exception e) {
-      return false;
+      log.error("Error getting memory health", e);
+        return false;
     }
   }
 
-  /**
-   * Get thread metrics. This method uses Tomcat MBeans to get thread metrics.
-   *
-   * @return map of thread metrics containing "currentThreadCount", "currentThreadsBusy",
-   *     "availableThreads" and "maxThreads"
-   */
-  private Map<String, Object> getThreadMetrics()
-      throws MalformedObjectNameException, InstanceNotFoundException, ReflectionException {
-    Map<String, Object> threadMetrics = new HashMap<>();
+  private boolean isThreadHealthy() {
+       try {
+        // Using ManagementFactory to get thread usage information
+        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 
-    ObjectName objectName = new ObjectName("Tomcat:type=ThreadPool,name=\"http-nio-8080\"");
-    var mBeanServer = Registry.getRegistry(null, null).getMBeanServer();
+        // Get the current number of busy threads
+        int busyThreads = threadMXBean.getThreadCount();  // Total number of threads in the JVM
 
-    AttributeList attributes =
-        mBeanServer.getAttributes(
-            objectName, new String[] {"currentThreadCount", "currentThreadsBusy", "maxThreads"});
+        // Get the maximum number of threads allowed by the JVM
+        int maxThreads = Runtime.getRuntime().availableProcessors() * 2;  // Example assumption
 
-    attributes
-        .asList()
-        .forEach(attribute -> threadMetrics.put(attribute.getName(), attribute.getValue()));
+        // Calculate thread usage ratio
+        double threadUsageRatio = (double) busyThreads / maxThreads;
 
-    // Calculate available threads
-    int currentThreadCount = (int) threadMetrics.get("currentThreadCount");
-    int busyThreads = (int) threadMetrics.get("currentThreadsBusy");
-    threadMetrics.put("availableThreads", currentThreadCount - busyThreads);
-
-    return threadMetrics;
+        return threadUsageRatio <= THREAD_USAGE_THRESHOLD;
+    } catch (Exception e) {
+        // Log the exception if necessary
+        return false;
+    }
   }
 
-  /**
-   * Get memory metrics. This method uses Java Management API to get memory metrics.
-   *
-   * @return map of memory metrics containing "heapMemoryUsed" and "heapMemoryMax"
-   */
-  private Map<String, Object> getMemoryMetrics() {
-    Map<String, Object> memoryMetrics = new HashMap<>();
 
-    MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-    memoryMetrics.put("heapMemoryUsed", memoryBean.getHeapMemoryUsage().getUsed());
-    memoryMetrics.put("heapMemoryMax", memoryBean.getHeapMemoryUsage().getMax());
-
-    return memoryMetrics;
-  }
 }
