@@ -11,7 +11,6 @@ import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,8 +28,6 @@ public class DiscoveryServiceConfiguration {
 
   private final ClientHealthService clientHealthService;
   private final ClientProperties clientProperties;
-
-  private final ServletWebServerApplicationContext server;
 
   /** Register on every startup of server */
   @PostConstruct
@@ -90,6 +87,6 @@ public class DiscoveryServiceConfiguration {
    * @return String host:port
    */
   private String getCurrentServerAddress() {
-    return String.valueOf(this.server.getWebServer().getPort());
+    return "8080";
   }
 }
