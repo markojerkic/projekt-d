@@ -34,8 +34,6 @@ public class ClientHealthService implements ServiceHealthService {
 
   @Override
   public void updateHealth(HealthUpdateInput healthUpdateInput) {
-    log.info(
-        "Updating health to addr {}", this.clientProperties.getDiscoveryServerUrl() + "/health");
     this.restTemplate.postForObject(
         this.clientProperties.getDiscoveryServerUrl() + "/health", healthUpdateInput, Void.class);
   }

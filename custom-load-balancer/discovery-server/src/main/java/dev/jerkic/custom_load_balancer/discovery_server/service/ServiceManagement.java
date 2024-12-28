@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,6 +28,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class ServiceManagement implements ServiceHealthService {
   private final ServiceModelRepository serviceModelRepository;
   private final ServiceInstanceRepository serviceInstanceRepository;
+  private final JdbcTemplate jdbcTemplate;
 
   @Override
   @Transactional
@@ -66,14 +69,16 @@ public class ServiceManagement implements ServiceHealthService {
   @Override
   public void updateHealth(HealthUpdateInput healthUpdateInput) {
     var service =
-        this.serviceModelRepository
-            .findById(UUID.fromString(healthUpdateInput.getInstanceId()))
+        this.serviceInstanceRepository
+            .findByInstanceId(UUID.fromString(healthUpdateInput.getInstanceId()))
+            .map(ServiceInstance::getServiceModel)
             .orElseThrow(
                 () ->
                     new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         String.format(
-                            "Service with id '%s' not found", healthUpdateInput.getInstanceId())));
+                            "Service with instanceId '%s' not found",
+                            healthUpdateInput.getInstanceId())));
 
     var newInstance =
         this.serviceInstanceRepository.save(
@@ -105,11 +110,8 @@ public class ServiceManagement implements ServiceHealthService {
    * @return collection of instances
    */
   public Collection<ServiceInstance> getInstacesForService(String serviceId) {
-    var fiveMinutesCutoffTime = System.currentTimeMillis() - (5 * 60 * 1000);
-
     var instances =
-        this.serviceInstanceRepository.findLatestForServiceId(
-            UUID.fromString(serviceId), fiveMinutesCutoffTime);
+        this.serviceInstanceRepository.findLatestForServiceId(UUID.fromString(serviceId));
 
     var groupedByInstanceId =
         instances.stream().collect(Collectors.groupingBy(ServiceInstance::getInstanceId));
@@ -127,6 +129,17 @@ public class ServiceManagement implements ServiceHealthService {
                 new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
                     String.format("Service with id '%s' not found", serviceId)));
+  }
+
+  // Every 3 minutes, cleanup all instances older than 3 mins
+  @Scheduled(fixedRate = 3 * 60 * 1000)
+  @Transactional
+  public void cleanOldInstances() {
+    this.jdbcTemplate.update(
+        """
+        delete from service_instance where
+        strftime('%s', 'now') * 1000 - service_instance.instance_recorded_at >= 3*60*1000;
+        """);
   }
 
   /**

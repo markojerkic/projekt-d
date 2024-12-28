@@ -31,7 +31,9 @@ public class ServiceInstance {
   @Column(columnDefinition = "TEXT")
   private UUID entryId;
 
+  @Column(columnDefinition = "TEXT")
   private UUID instanceId;
+
   private boolean isHealthy;
   private String address;
   private Long numberOfConnections;
