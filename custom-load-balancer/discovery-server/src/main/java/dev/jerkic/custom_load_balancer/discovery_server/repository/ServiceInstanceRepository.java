@@ -24,19 +24,22 @@ public interface ServiceInstanceRepository
    * @return page of healthy instances
    */
   @Query(
-      """
-      select si
-      from ServiceInstance si
-      join (
-          select s.instanceId as instanceId, max(s.instanceRecordedAt) as latestTimestamp
-          from ServiceInstance s
-          where s.serviceModel.id = :serviceId
-            and s.isHealthy = true
-            and (current_timestamp - s.instanceRecordedAt >= 3 * 60 * 1000)
-          group by s.instanceId
-      ) latest
-      on si.instanceId = latest.instanceId
-      order by si.instanceRecordedAt desc, si.numberOfConnections asc
-      """)
+      value =
+          """
+          select si.*
+          from service_instance si
+          join (
+              select s.instance_id, max(s.instance_recorded_at) as latest_timestamp
+              from service_instance s
+              where s.service_model_id = :serviceId
+                and s.is_healthy is true
+                and strftime('%s', 'now') * 1000 - s.instance_recorded_at
+                >= 3*60*1000
+              group by s.instance_id
+          ) latest
+          on si.instance_id = latest.instance_id
+          order by si.instance_recorded_at desc, si.number_of_connections asc
+          """,
+      nativeQuery = true)
   List<ServiceInstance> findLatestForServiceId(@Param("serviceId") UUID serviceId);
 }
