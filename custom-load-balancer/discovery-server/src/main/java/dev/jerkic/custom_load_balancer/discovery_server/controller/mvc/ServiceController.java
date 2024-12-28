@@ -26,7 +26,10 @@ public class ServiceController {
     var serviceInstances = this.serviceManagement.getInstacesForService(serviceId);
     var serviceInfo = this.serviceManagement.getServiceInfo(serviceId);
 
-    model.addAttribute("instances", serviceInstances);
+    log.info("Service instances: {}", serviceInstances.getContent());
+    log.info("Service info: {}", serviceInfo);
+
+    model.addAttribute("instances", serviceInstances.getContent());
     model.addAttribute("serviceInfo", serviceInfo);
 
     return "service-detail";
@@ -38,7 +41,10 @@ public class ServiceController {
     var serviceInstances = this.serviceManagement.getInstacesForService(serviceId);
     var serviceInfo = this.serviceManagement.getServiceInfo(serviceId);
 
-    model.addAttribute("instances", serviceInstances);
+    log.info("Service instances: {}", serviceInstances.getContent());
+    log.info("Service info: {}", serviceInfo);
+
+    model.addAttribute("instances", serviceInstances.getContent());
     model.addAttribute("serviceInfo", serviceInfo);
 
     return "partials/services :: serviceDetail";

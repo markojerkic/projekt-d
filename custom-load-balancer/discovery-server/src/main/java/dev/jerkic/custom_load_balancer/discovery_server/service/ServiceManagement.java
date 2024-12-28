@@ -2,9 +2,9 @@ package dev.jerkic.custom_load_balancer.discovery_server.service;
 
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceInstance;
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceModel;
+import dev.jerkic.custom_load_balancer.discovery_server.model.projection.ServiceModelLazyProjection;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceInstanceRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
-import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository.ServiceModelProjection;
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -81,20 +82,20 @@ public class ServiceManagement implements ServiceHealthService {
         "Health updated for service '{}' with health {}", service.getServiceName(), newInstance);
   }
 
-  public List<ServiceModelProjection> getServices() {
+  public List<ServiceModelLazyProjection> getServices() {
     return this.serviceModelRepository.findAllProjectedBy();
   }
 
-  public Iterable<ServiceInstance> getInstacesForService(String serviceId) {
-    return this.serviceInstanceRepository.findByServiceIdAndIsHealthyTrue(
+  public Page<ServiceInstance> getInstacesForService(String serviceId) {
+    return this.serviceInstanceRepository.findByServiceId(
         serviceId,
         PageRequest.of(
-            0, 5, Sort.by(Sort.Order.desc("timestamp"), Sort.Order.asc("numberOfConnections"))));
+            0, 10, Sort.by(Sort.Order.desc("timestamp"), Sort.Order.asc("numberOfConnections"))));
   }
 
-  public ServiceModel getServiceInfo(String serviceId) {
+  public ServiceModelLazyProjection getServiceInfo(String serviceId) {
     return this.serviceModelRepository
-        .findById(serviceId)
+        .findProjectionById(serviceId)
         .orElseThrow(
             () ->
                 new ResponseStatusException(

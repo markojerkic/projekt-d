@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" hx-boost="true">
-  <header th:replace="index.html :: header"></header>
+  <header th:replace="~{index.html :: header}"></header>
 
-  <style th:replace="index.html :: styles"></style>
+  <style th:replace="~{index.html :: styles}"></style>
 
   <body>
     <nav class="bg-blue-800 p-4">
@@ -11,6 +11,6 @@
       </div>
     </nav>
 
-    <div th:replace="partials/services.html :: serviceDetail"></div>
+    <div th:replace="~{partials/services.html :: serviceDetail}"></div>
   </body>
 </html>
