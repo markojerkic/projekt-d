@@ -2,6 +2,7 @@ package dev.jerkic.custom_load_balancer.discovery_server.service;
 
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceInstance;
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceModel;
+import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceInstanceRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceRepository;
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -21,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class ServiceManagement implements ServiceHealthService {
   private final ServiceRepository serviceRepository;
+  private final ServiceInstanceRepository serviceInstanceRepository;
 
   // Map of service name to service id to service info
   private final ConcurrentHashMap<String, ConcurrentHashMap<String, ServiceInfo>> services =
@@ -37,6 +40,7 @@ public class ServiceManagement implements ServiceHealthService {
     return this.serviceRepository.save(service).getId();
   }
 
+  @Transactional
   @Override
   public void updateHealth(HealthUpdateInput healthUpdateInput) {
     var service =
@@ -49,15 +53,17 @@ public class ServiceManagement implements ServiceHealthService {
                         String.format(
                             "Service with id '%s' not found", healthUpdateInput.getServiceId())));
 
-    service
-        .getInstances()
-        .add(
+    var newInstance =
+        this.serviceInstanceRepository.save(
             ServiceInstance.builder()
                 .timestamp(healthUpdateInput.getHealth().getTimestamp())
                 .numberOfConnections(healthUpdateInput.getHealth().getNumberOfConnections())
                 .isHealthy(healthUpdateInput.getHealth().isHealthy())
                 .build());
+    service.getInstances().add(newInstance);
 
     this.serviceRepository.save(service);
+    log.info(
+        "Health updated for service '{}' with health {}", service.getServiceName(), newInstance);
   }
 }
