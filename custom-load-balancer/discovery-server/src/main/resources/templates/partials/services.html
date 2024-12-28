@@ -17,6 +17,8 @@
 <!--Service detail. Show service instances with last update timestamp, health and number of connections.-->
 <div
   class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+  th:hx-get="@{/service/{id}(id=${serviceInfo.id})}"
+  hx-trigger="every 10s"
   th:fragment="serviceDetail"
 >
   <h2

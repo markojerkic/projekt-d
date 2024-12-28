@@ -1,6 +1,7 @@
 package dev.jerkic.custom_load_balancer.discovery_server.controller.mvc;
 
 import dev.jerkic.custom_load_balancer.discovery_server.service.ServiceManagement;
+import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -21,7 +22,7 @@ public class ServiceController {
   }
 
   @GetMapping("/service/{serviceId}")
-  public String services(Model model, @PathVariable String serviceId) {
+  public String instances(Model model, @PathVariable String serviceId) {
     var serviceInstances = this.serviceManagement.getInstacesForService(serviceId);
     var serviceInfo = this.serviceManagement.getServiceInfo(serviceId);
 
@@ -29,5 +30,17 @@ public class ServiceController {
     model.addAttribute("serviceInfo", serviceInfo);
 
     return "service-detail";
+  }
+
+  @HxRequest
+  @GetMapping("/service/{serviceId}")
+  public String hxInstances(Model model, @PathVariable String serviceId) {
+    var serviceInstances = this.serviceManagement.getInstacesForService(serviceId);
+    var serviceInfo = this.serviceManagement.getServiceInfo(serviceId);
+
+    model.addAttribute("instances", serviceInstances);
+    model.addAttribute("serviceInfo", serviceInfo);
+
+    return "partials/services :: serviceDetail";
   }
 }
