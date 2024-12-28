@@ -22,7 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Slf4j
 @RequiredArgsConstructor
 public class ServiceManagement implements ServiceHealthService {
-  private final ServiceRepository serviceRepository;
+  private final ServiceRepository serviceModelRepository;
   private final ServiceInstanceRepository serviceInstanceRepository;
 
   // Map of service name to service id to service info
@@ -37,14 +37,14 @@ public class ServiceManagement implements ServiceHealthService {
     var serviceInfo = registerInput.getServiceInfo();
 
     var service = ServiceModel.builder().serviceName(serviceInfo.getServiceName()).build();
-    return this.serviceRepository.save(service).getId();
+    return this.serviceModelRepository.save(service).getId();
   }
 
   @Transactional
   @Override
   public void updateHealth(HealthUpdateInput healthUpdateInput) {
     var service =
-        this.serviceRepository
+        this.serviceModelRepository
             .findById(healthUpdateInput.getServiceId())
             .orElseThrow(
                 () ->
@@ -62,8 +62,12 @@ public class ServiceManagement implements ServiceHealthService {
                 .build());
     service.getInstances().add(newInstance);
 
-    this.serviceRepository.save(service);
+    this.serviceModelRepository.save(service);
     log.info(
         "Health updated for service '{}' with health {}", service.getServiceName(), newInstance);
+  }
+
+  public Iterable<ServiceModel> getServices() {
+    return this.serviceModelRepository.findAll();
   }
 }
