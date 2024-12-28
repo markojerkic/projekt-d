@@ -2,7 +2,6 @@ package dev.jerkic.custom_load_balancer.discovery_server.service;
 
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceInstance;
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceModel;
-import dev.jerkic.custom_load_balancer.discovery_server.model.projection.ServiceModelLazyProjection;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceInstanceRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
@@ -98,8 +97,8 @@ public class ServiceManagement implements ServiceHealthService {
         "Health updated for service '{}' with health {}", service.getServiceName(), newInstance);
   }
 
-  public List<ServiceModelLazyProjection> getServices() {
-    return this.serviceModelRepository.findAllProjectedBy();
+  public Iterable<ServiceModel> getServices() {
+    return this.serviceModelRepository.findAll();
   }
 
   /**
@@ -126,9 +125,9 @@ public class ServiceManagement implements ServiceHealthService {
         .collect(Collectors.toList());
   }
 
-  public ServiceModelLazyProjection getServiceInfo(String serviceId) {
+  public ServiceModel getServiceInfo(String serviceId) {
     return this.serviceModelRepository
-        .findProjectionById(UUID.fromString(serviceId))
+        .findById(UUID.fromString(serviceId))
         .orElseThrow(
             () ->
                 new ResponseStatusException(
