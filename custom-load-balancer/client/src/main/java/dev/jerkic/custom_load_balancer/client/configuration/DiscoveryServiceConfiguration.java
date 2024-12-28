@@ -10,6 +10,7 @@ import jakarta.annotation.PostConstruct;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,9 @@ public class DiscoveryServiceConfiguration {
   // unhealthy
   private static final double THREAD_USAGE_THRESHOLD = 0.85;
   private static final double MEMORY_USAGE_THRESHOLD = 0.90;
+
+  @Value("${local.server.port}")
+  private int serverPort;
 
   private final ServerProperties serverProperties;
 
@@ -88,7 +92,6 @@ public class DiscoveryServiceConfiguration {
     return ServiceInfo.builder()
         .serviceName(this.clientProperties.getServiceName())
         .serviceHealthCheckUrl("/health")
-        .serviceAddress(this.getCurrentServerAddress())
         .build();
   }
 
@@ -104,6 +107,7 @@ public class DiscoveryServiceConfiguration {
         .timestamp(Instant.now())
         .isHealthy(true)
         .numberOfConnections(0l)
+        .address(this.getCurrentServerAddress())
         .build();
   }
 
@@ -113,6 +117,6 @@ public class DiscoveryServiceConfiguration {
    * @return String host:port
    */
   private String getCurrentServerAddress() {
-    return String.valueOf(this.serverProperties.getPort());
+    return String.valueOf(this.serverPort);
   }
 }

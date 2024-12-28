@@ -21,6 +21,7 @@ public class ServiceInstance {
   @Indexed private String instanceId;
   @Indexed private String serviceId;
   @Indexed private boolean isHealthy;
+  private String address;
   private Long numberOfConnections;
   private Instant timestamp;
 }

@@ -11,4 +11,5 @@ public class ServiceHealthInput {
   private boolean isHealthy;
   private Long numberOfConnections;
   private Instant timestamp;
+  private String address;
 }

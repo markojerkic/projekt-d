@@ -8,11 +8,13 @@ import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelR
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -49,6 +51,7 @@ public class ServiceManagement implements ServiceHealthService {
             .serviceId(serviceId)
             .isHealthy(registerInput.getServiceHealth().isHealthy())
             .timestamp(registerInput.getServiceHealth().getTimestamp())
+            .address(registerInput.getServiceHealth().getAddress())
             .numberOfConnections(registerInput.getServiceHealth().getNumberOfConnections())
             .build();
 
@@ -72,6 +75,8 @@ public class ServiceManagement implements ServiceHealthService {
         this.serviceInstanceRepository.save(
             ServiceInstance.builder()
                 .serviceId(service.getId())
+                .instanceId(healthUpdateInput.getHealth().getServiceName())
+                .address(healthUpdateInput.getHealth().getAddress())
                 .timestamp(healthUpdateInput.getHealth().getTimestamp())
                 .numberOfConnections(healthUpdateInput.getHealth().getNumberOfConnections())
                 .isHealthy(healthUpdateInput.getHealth().isHealthy())
@@ -87,11 +92,48 @@ public class ServiceManagement implements ServiceHealthService {
     return this.serviceModelRepository.findAllProjectedBy();
   }
 
-  public Page<ServiceInstance> getInstacesForService(String serviceId) {
-    return this.serviceInstanceRepository.findByServiceIdAndIsHealthyTrue(
-        serviceId,
-        PageRequest.of(
-            0, 10, Sort.by(Sort.Order.desc("timestamp"), Sort.Order.asc("numberOfConnections"))));
+  /**
+   * Return collection of instances. Group results by instanceId, sort by timestamp and for each
+   * instaceId, return only the latest instance
+   *
+   * @param serviceId
+   * @return collection of instances
+   */
+  public Collection<ServiceInstance> getInstacesForService(String serviceId) {
+    var instances =
+        this.serviceInstanceRepository.findByServiceIdAndIsHealthyTrue(
+            serviceId,
+            PageRequest.of(
+                0,
+                10,
+                Sort.by(Sort.Order.desc("timestamp"), Sort.Order.asc("numberOfConnections"))));
+
+    var groupedByInstanceId =
+        instances.stream().collect(Collectors.groupingBy(ServiceInstance::getServiceId));
+
+    return groupedByInstanceId.values().stream()
+        .map(extractLatestInstace())
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Extract latest instance from collection of instances by reducing them to the one with the
+   * latest
+   *
+   * @return function that extracts latest instance
+   */
+  private Function<Collection<ServiceInstance>, ServiceInstance> extractLatestInstace() {
+    return serviceInstances ->
+        serviceInstances.stream()
+            .reduce(
+                (first, second) -> {
+                  if (first.getTimestamp().isAfter(second.getTimestamp())) {
+                    return first;
+                  } else {
+                    return second;
+                  }
+                })
+            .get();
   }
 
   public ServiceModelLazyProjection getServiceInfo(String serviceId) {

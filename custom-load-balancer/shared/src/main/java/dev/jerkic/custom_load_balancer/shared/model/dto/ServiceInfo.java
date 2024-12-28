@@ -7,6 +7,5 @@ import lombok.Data;
 @Builder
 public class ServiceInfo {
   private String serviceName;
-  private String serviceAddress;
   private String serviceHealthCheckUrl;
 }
