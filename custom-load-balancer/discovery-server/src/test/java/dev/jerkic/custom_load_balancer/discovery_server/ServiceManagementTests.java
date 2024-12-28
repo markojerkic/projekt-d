@@ -15,6 +15,7 @@ import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceHealthInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceInfo;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
+import java.util.Date;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -99,10 +100,11 @@ public class ServiceManagementTests {
   public void testUpdateHeath() {
     // Register
     var serviceName = "test-service";
+    var initialHealth = this.getServiceHealth("8090", true, serviceName);
     var registerInput =
         RegisterInput.builder()
             .serviceInfo(this.getServiceInfo(serviceName))
-            .serviceHealth(this.getServiceHealth("8090", true, serviceName))
+            .serviceHealth(initialHealth)
             .build();
 
     var instanceId = this.serviceManagement.registerService(registerInput);
@@ -130,6 +132,75 @@ public class ServiceManagementTests {
         this.serviceManagement.getInstacesForService(serviceModel.getId().toString());
 
     assertEquals(1, serviceInstances.size());
+    assertEquals(
+        Date.from(healthUpdate.getTimestamp()),
+        ((ServiceInstance) serviceInstances.toArray()[0]).getInstanceRecordedAt());
+    assertNotEquals(
+        Date.from(initialHealth.getTimestamp()),
+        ((ServiceInstance) serviceInstances.toArray()[0]).getInstanceRecordedAt());
+  }
+
+  @Test
+  public void testMultipleInstances() {
+    // Register
+    var serviceName = "test-service";
+    var initialHealth = this.getServiceHealth("8090", true, serviceName);
+    var registerInput =
+        RegisterInput.builder()
+            .serviceInfo(this.getServiceInfo(serviceName))
+            .serviceHealth(initialHealth)
+            .build();
+
+    var instanceId1 = this.serviceManagement.registerService(registerInput);
+    var instanceId2 = this.serviceManagement.registerService(registerInput);
+
+    var healthUpdate1 = this.getServiceHealth("8090", true, serviceName);
+    this.serviceManagement.updateHealth(
+        HealthUpdateInput.builder()
+            .instanceId(instanceId1)
+            .serviceName(healthUpdate1.getServiceName())
+            .health(healthUpdate1)
+            .build());
+
+    var healthUpdate2 = this.getServiceHealth("8090", true, serviceName);
+    this.serviceManagement.updateHealth(
+        HealthUpdateInput.builder()
+            .instanceId(instanceId1)
+            .serviceName(healthUpdate2.getServiceName())
+            .health(healthUpdate2)
+            .build());
+
+    var healthUpdate3 = this.getServiceHealth("8090", true, serviceName);
+    this.serviceManagement.updateHealth(
+        HealthUpdateInput.builder()
+            .instanceId(instanceId2)
+            .serviceName(healthUpdate3.getServiceName())
+            .health(healthUpdate3)
+            .build());
+
+    var serviceModel =
+        this.serviceInstanceRepository
+            .findFirstByInstanceId(instanceId1)
+            .map(ServiceInstance::getServiceModel)
+            .get();
+
+    var serviceInstances =
+        this.serviceManagement.getInstacesForService(serviceModel.getId().toString());
+
+    assertEquals(2, serviceInstances.size());
+    var instance1 =
+        serviceInstances.stream()
+            .filter(instance -> instance.getInstanceId().equals(instanceId1))
+            .findFirst()
+            .get();
+    var instance2 =
+        serviceInstances.stream()
+            .filter(instance -> instance.getInstanceId().equals(instanceId2))
+            .findFirst()
+            .get();
+
+    assertEquals(Date.from(healthUpdate2.getTimestamp()), instance1.getInstanceRecordedAt());
+    assertEquals(Date.from(healthUpdate3.getTimestamp()), instance2.getInstanceRecordedAt());
   }
 
   private ServiceHealthInput getServiceHealth(String port, boolean isHealthy, String serviceName) {
