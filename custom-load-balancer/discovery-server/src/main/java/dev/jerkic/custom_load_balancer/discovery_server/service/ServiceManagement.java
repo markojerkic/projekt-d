@@ -56,7 +56,7 @@ public class ServiceManagement implements ServiceHealthService {
             // empty shell only containing PK for JPA to connect them
             .serviceModel(serviceModel)
             .isHealthy(registerInput.getServiceHealth().isHealthy())
-            .timestamp(Date.from(registerInput.getServiceHealth().getTimestamp()))
+            .instanceRecordedAt(Date.from(registerInput.getServiceHealth().getTimestamp()))
             .address(registerInput.getServiceHealth().getAddress())
             .numberOfConnections(registerInput.getServiceHealth().getNumberOfConnections())
             .build();
@@ -84,7 +84,7 @@ public class ServiceManagement implements ServiceHealthService {
                 .serviceModel(ServiceModel.builder().id(service.getId()).build())
                 .instanceId(UUID.fromString(healthUpdateInput.getInstanceId()))
                 .address(healthUpdateInput.getHealth().getAddress())
-                .timestamp(Date.from(healthUpdateInput.getHealth().getTimestamp()))
+                .instanceRecordedAt(Date.from(healthUpdateInput.getHealth().getTimestamp()))
                 .numberOfConnections(healthUpdateInput.getHealth().getNumberOfConnections())
                 .isHealthy(healthUpdateInput.getHealth().isHealthy())
                 .build());
@@ -113,7 +113,8 @@ public class ServiceManagement implements ServiceHealthService {
             PageRequest.of(
                 0,
                 10,
-                Sort.by(Sort.Order.desc("timestamp"), Sort.Order.asc("numberOfConnections"))));
+                Sort.by(
+                    Sort.Order.desc("instanceRecordedAt"), Sort.Order.asc("numberOfConnections"))));
 
     var groupedByInstanceId =
         instances.stream().collect(Collectors.groupingBy(ServiceInstance::getInstanceId));

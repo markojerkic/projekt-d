@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
       @Index(name = "service_instance_instance_id_index", columnList = "instanceId"),
       @Index(
           name = "service_instance_timestamp_desc_health_index",
-          columnList = "timestamp DESC, isHealthy")
+          columnList = "instanceRecordedAt DESC, isHealthy")
     })
 public class ServiceInstance {
   @Id
@@ -35,7 +35,7 @@ public class ServiceInstance {
   private boolean isHealthy;
   private String address;
   private Long numberOfConnections;
-  private Date timestamp;
+  private Date instanceRecordedAt;
 
   @ManyToOne(fetch = FetchType.LAZY)
   private ServiceModel serviceModel;
