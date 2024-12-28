@@ -1,11 +1,14 @@
 package dev.jerkic.custom_load_balancer.discovery_server;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceInstanceRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.service.ServiceManagement;
+import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceHealthInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceInfo;
@@ -16,6 +19,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.server.ResponseStatusException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
@@ -52,6 +56,39 @@ public class ServiceManagementTests {
 
     assertEquals(1, this.serviceModelRepository.count());
     assertEquals(1, this.serviceInstanceRepository.count());
+  }
+
+  @Test
+  public void testRegisterExistingService() {
+    var serviceName = "test-service";
+    var registerInput =
+        RegisterInput.builder()
+            .serviceInfo(this.getServiceInfo(serviceName))
+            .serviceHealth(this.getServiceHealth("8090", true, serviceName))
+            .build();
+
+    var instanceId = this.serviceManagement.registerService(registerInput);
+    assertNotNull(instanceId);
+
+    var instanceId2 = this.serviceManagement.registerService(registerInput);
+    assertNotEquals(instanceId, instanceId2);
+
+    assertEquals(1, this.serviceModelRepository.count());
+    assertEquals(2, this.serviceInstanceRepository.count());
+  }
+
+  @Test
+  public void testUpdateHealthForNonExistingService() {
+    var healthUpdate = this.getServiceHealth("8090", true, "test-service");
+    assertThrows(
+        ResponseStatusException.class,
+        () -> {
+          this.serviceManagement.updateHealth(
+              HealthUpdateInput.builder()
+                  .serviceName(healthUpdate.getServiceName())
+                  .health(healthUpdate)
+                  .build());
+        });
   }
 
   private ServiceHealthInput getServiceHealth(String port, boolean isHealthy, String serviceName) {
