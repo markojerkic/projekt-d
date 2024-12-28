@@ -10,6 +10,8 @@ import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,7 +84,10 @@ public class ServiceManagement implements ServiceHealthService {
   }
 
   public Iterable<ServiceInstance> getInstacesForService(String serviceId) {
-    return this.serviceInstanceRepository.findByServiceId(serviceId);
+    return this.serviceInstanceRepository.findByServiceId(
+        serviceId,
+        PageRequest.of(
+            0, 5, Sort.by(Sort.Order.desc("timestamp"), Sort.Order.asc("numberOfConnections"))));
   }
 
   public ServiceModel getServiceInfo(String serviceId) {
