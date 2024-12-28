@@ -22,9 +22,6 @@ public class ClientHealthService implements ServiceHealthService {
 
   @Override
   public String registerService(RegisterInput registerInput) {
-    log.info(
-        "Registering service with discovery server at {}",
-        this.clientProperties.getDiscoveryServerUrl() + "/register");
     var instanceId =
         this.restTemplate.postForObject(
             this.clientProperties.getDiscoveryServerUrl() + "/register",
