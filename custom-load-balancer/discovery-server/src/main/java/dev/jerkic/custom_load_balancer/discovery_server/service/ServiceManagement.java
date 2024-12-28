@@ -54,7 +54,8 @@ public class ServiceManagement implements ServiceHealthService {
 
     var instance =
         ServiceInstance.builder()
-            .instanceId(UUID.randomUUID().toString())
+            .entryId(UUID.randomUUID())
+            .instanceId(UUID.randomUUID())
             // empty shell only containing PK for JPA to connect them
             .serviceModel(serviceModel)
             .isHealthy(registerInput.getServiceHealth().isHealthy())
@@ -63,7 +64,7 @@ public class ServiceManagement implements ServiceHealthService {
             .numberOfConnections(registerInput.getServiceHealth().getNumberOfConnections())
             .build();
 
-    return this.serviceInstanceRepository.save(instance).getInstanceId();
+    return this.serviceInstanceRepository.save(instance).getInstanceId().toString();
   }
 
   @Transactional
@@ -84,7 +85,7 @@ public class ServiceManagement implements ServiceHealthService {
             ServiceInstance.builder()
                 // empty shell only containing PK for JPA to connect them
                 .serviceModel(ServiceModel.builder().id(service.getId()).build())
-                .instanceId(healthUpdateInput.getInstanceId())
+                .instanceId(UUID.fromString(healthUpdateInput.getInstanceId()))
                 .address(healthUpdateInput.getHealth().getAddress())
                 .timestamp(healthUpdateInput.getHealth().getTimestamp())
                 .numberOfConnections(healthUpdateInput.getHealth().getNumberOfConnections())

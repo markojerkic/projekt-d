@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
     })
 public class ServiceInstance {
   @Id private UUID entryId;
-  private String instanceId;
+  private UUID instanceId;
   private boolean isHealthy;
   private String address;
   private Long numberOfConnections;
