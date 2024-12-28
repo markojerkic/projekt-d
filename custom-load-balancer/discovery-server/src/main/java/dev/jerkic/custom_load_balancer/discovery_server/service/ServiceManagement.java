@@ -88,7 +88,7 @@ public class ServiceManagement implements ServiceHealthService {
   }
 
   public Page<ServiceInstance> getInstacesForService(String serviceId) {
-    return this.serviceInstanceRepository.findByServiceId(
+    return this.serviceInstanceRepository.findByServiceIdAndIsHealthyTrue(
         serviceId,
         PageRequest.of(
             0, 10, Sort.by(Sort.Order.desc("timestamp"), Sort.Order.asc("numberOfConnections"))));
