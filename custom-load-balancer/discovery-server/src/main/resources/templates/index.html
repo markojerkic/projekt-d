@@ -29,14 +29,13 @@
 
   <nav class="bg-blue-800 p-4">
     <div class="container mx-auto flex justify-between items-center">
-      <a href="#" class="text-white text-2xl">Services</a>
-      <!--<a href="/auth/logout" class="text-white justify-self-end">Logout</a>-->
+      <a href="/" class="text-white text-2xl">Services</a>
     </div>
   </nav>
 
   <body>
     <h1>Services</h1>
 
-    <div th:replace="partials/services.html"></div>
+    <div th:replace="partials/services.html :: serviceInstances"></div>
   </body>
 </html>

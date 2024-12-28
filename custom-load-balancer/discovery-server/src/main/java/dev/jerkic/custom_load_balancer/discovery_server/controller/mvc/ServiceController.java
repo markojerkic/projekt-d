@@ -28,6 +28,6 @@ public class ServiceController {
     model.addAttribute("instances", serviceInstances);
     model.addAttribute("serviceInfo", serviceInfo);
 
-    return "services";
+    return "service-detail";
   }
 }
