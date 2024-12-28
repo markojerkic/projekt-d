@@ -39,19 +39,19 @@ public class ServiceManagement implements ServiceHealthService {
     var registeredService =
         this.serviceModelRepository.findByServiceName(serviceInfo.getServiceName());
 
-    String serviceId;
+    UUID serviceId;
     if (!registeredService.isPresent()) {
       var service = ServiceModel.builder().serviceName(serviceInfo.getServiceName()).build();
-      this.serviceModelRepository.save(service).getId();
-      serviceId = service.getId();
+      serviceId = this.serviceModelRepository.save(service).getServiceId();
     } else {
-      serviceId = registeredService.map(ServiceModel::getId).get();
+      serviceId = registeredService.map(ServiceModel::getServiceId).get();
     }
 
     var instance =
         ServiceInstance.builder()
             .instanceId(UUID.randomUUID().toString())
-            .serviceId(serviceId)
+            // empty shell only containing PK for JPA to connect them
+            .serviceModel(ServiceModel.builder().serviceId(serviceId).build())
             .isHealthy(registerInput.getServiceHealth().isHealthy())
             .timestamp(registerInput.getServiceHealth().getTimestamp())
             .address(registerInput.getServiceHealth().getAddress())
@@ -66,7 +66,7 @@ public class ServiceManagement implements ServiceHealthService {
   public void updateHealth(HealthUpdateInput healthUpdateInput) {
     var service =
         this.serviceModelRepository
-            .findById(healthUpdateInput.getInstanceId())
+            .findById(UUID.fromString(healthUpdateInput.getInstanceId()))
             .orElseThrow(
                 () ->
                     new ResponseStatusException(
@@ -77,7 +77,8 @@ public class ServiceManagement implements ServiceHealthService {
     var newInstance =
         this.serviceInstanceRepository.save(
             ServiceInstance.builder()
-                .serviceId(service.getId())
+                // empty shell only containing PK for JPA to connect them
+                .serviceModel(ServiceModel.builder().serviceId(service.getServiceId()).build())
                 .instanceId(healthUpdateInput.getInstanceId())
                 .address(healthUpdateInput.getHealth().getAddress())
                 .timestamp(healthUpdateInput.getHealth().getTimestamp())

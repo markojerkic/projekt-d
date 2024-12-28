@@ -1,26 +1,27 @@
 package dev.jerkic.custom_load_balancer.discovery_server.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Reference;
-import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
 
-@RedisHash("service")
+@Entity
+@Data
 @Builder
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ServiceModel {
-  @Id private String id;
-  @Indexed private String serviceName;
-  // Collection of service instances
-  @Builder.Default @Reference private Set<ServiceInstance> instances = new HashSet<>();
+  @Id private UUID serviceId;
+  private String serviceName;
+
+  @Builder.Default
+  @OneToMany(mappedBy = "serviceModel", fetch = FetchType.LAZY)
+  private Set<ServiceInstance> instances = new HashSet<>();
 }
