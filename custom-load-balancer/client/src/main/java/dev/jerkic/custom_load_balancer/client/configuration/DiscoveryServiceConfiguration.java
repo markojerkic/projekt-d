@@ -8,10 +8,11 @@ import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceHealthInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceInfo;
 import jakarta.annotation.PostConstruct;
 import java.time.Instant;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -28,10 +29,8 @@ public class DiscoveryServiceConfiguration {
   private static final double THREAD_USAGE_THRESHOLD = 0.85;
   private static final double MEMORY_USAGE_THRESHOLD = 0.90;
 
-  @Value("${local.server.port}")
+  @Value("${server.port}")
   private int serverPort;
-
-  private final ServerProperties serverProperties;
 
   private final ClientHealthService clientHealthService;
   private final ClientProperties clientProperties;
@@ -51,11 +50,15 @@ public class DiscoveryServiceConfiguration {
       log.info("Registered service, id is {}", serviceId);
     } catch (Exception e) {
       log.error("Error registering service. Going to after 10s");
-      try {
-        Thread.sleep(10000);
-      } catch (InterruptedException ex) {
-        log.error("Error sleeping thread", ex);
-      }
+
+      Executors.newSingleThreadScheduledExecutor()
+          .schedule(
+              () -> {
+                register();
+              },
+              30,
+              TimeUnit.SECONDS);
+
       this.register();
     }
   }
