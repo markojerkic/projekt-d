@@ -105,7 +105,7 @@ public class ServiceManagement implements ServiceHealthService {
    */
   public Collection<ServiceInstance> getInstacesForService(String serviceId) {
     var instances =
-        this.serviceInstanceRepository.findByServiceIdAndIsHealthyTrue(
+        this.serviceInstanceRepository.findByServiceModel_idAndIsHealthyTrue(
             UUID.fromString(serviceId),
             PageRequest.of(
                 0,

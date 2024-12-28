@@ -17,5 +17,5 @@ public interface ServiceModelRepository
 
   Optional<ServiceModelLazyProjection> findProjectionByServiceName(String serviceName);
 
-  Optional<ServiceModelLazyProjection> findProjectionById(String id);
+  Optional<ServiceModelLazyProjection> findProjectionById(UUID id);
 }
