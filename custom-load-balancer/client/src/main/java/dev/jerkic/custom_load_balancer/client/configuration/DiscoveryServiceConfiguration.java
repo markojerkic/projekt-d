@@ -54,12 +54,11 @@ public class DiscoveryServiceConfiguration {
       Executors.newSingleThreadScheduledExecutor()
           .schedule(
               () -> {
+                log.info("Retrying registration");
                 register();
               },
               30,
               TimeUnit.SECONDS);
-
-      this.register();
     }
   }
 

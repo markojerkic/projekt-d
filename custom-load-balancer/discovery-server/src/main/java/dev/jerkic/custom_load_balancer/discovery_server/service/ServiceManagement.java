@@ -122,18 +122,22 @@ public class ServiceManagement implements ServiceHealthService {
    *
    * @return function that extracts latest instance
    */
-  private Function<Collection<ServiceInstance>, ServiceInstance> extractLatestInstace() {
-    return serviceInstances ->
-        serviceInstances.stream()
-            .reduce(
-                (first, second) -> {
-                  if (first.getTimestamp().isAfter(second.getTimestamp())) {
-                    return first;
-                  } else {
-                    return second;
-                  }
-                })
-            .get();
+  private Function<List<ServiceInstance>, ServiceInstance> extractLatestInstace() {
+    return serviceInstances -> {
+      return serviceInstances.getFirst();
+
+      // return serviceInstances.stream()
+      //    .findFirst()
+      //    // .reduce(
+      //    //    (first, second) -> {
+      //    //      if (first.getTimestamp().isAfter(second.getTimestamp())) {
+      //    //        return first;
+      //    //      } else {
+      //    //        return second;
+      //    //      }
+      //    //    })
+      //    .get();
+    };
   }
 
   public ServiceModelLazyProjection getServiceInfo(String serviceId) {
