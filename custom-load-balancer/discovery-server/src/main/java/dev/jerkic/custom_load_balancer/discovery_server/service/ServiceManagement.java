@@ -42,16 +42,16 @@ public class ServiceManagement implements ServiceHealthService {
     UUID serviceId;
     if (!registeredService.isPresent()) {
       var service = ServiceModel.builder().serviceName(serviceInfo.getServiceName()).build();
-      serviceId = this.serviceModelRepository.save(service).getServiceId();
+      serviceId = this.serviceModelRepository.save(service).getId();
     } else {
-      serviceId = registeredService.map(ServiceModel::getServiceId).get();
+      serviceId = registeredService.map(ServiceModel::getId).get();
     }
 
     var instance =
         ServiceInstance.builder()
             .instanceId(UUID.randomUUID().toString())
             // empty shell only containing PK for JPA to connect them
-            .serviceModel(ServiceModel.builder().serviceId(serviceId).build())
+            .serviceModel(ServiceModel.builder().id(serviceId).build())
             .isHealthy(registerInput.getServiceHealth().isHealthy())
             .timestamp(registerInput.getServiceHealth().getTimestamp())
             .address(registerInput.getServiceHealth().getAddress())
@@ -78,7 +78,7 @@ public class ServiceManagement implements ServiceHealthService {
         this.serviceInstanceRepository.save(
             ServiceInstance.builder()
                 // empty shell only containing PK for JPA to connect them
-                .serviceModel(ServiceModel.builder().serviceId(service.getServiceId()).build())
+                .serviceModel(ServiceModel.builder().id(service.getId()).build())
                 .instanceId(healthUpdateInput.getInstanceId())
                 .address(healthUpdateInput.getHealth().getAddress())
                 .timestamp(healthUpdateInput.getHealth().getTimestamp())
@@ -106,7 +106,7 @@ public class ServiceManagement implements ServiceHealthService {
   public Collection<ServiceInstance> getInstacesForService(String serviceId) {
     var instances =
         this.serviceInstanceRepository.findByServiceIdAndIsHealthyTrue(
-            serviceId,
+            UUID.fromString(serviceId),
             PageRequest.of(
                 0,
                 10,

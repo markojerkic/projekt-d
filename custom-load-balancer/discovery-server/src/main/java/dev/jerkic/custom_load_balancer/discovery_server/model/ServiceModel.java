@@ -2,6 +2,7 @@ package dev.jerkic.custom_load_balancer.discovery_server.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,15 +11,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 
-@Entity
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
 public class ServiceModel {
-  @Id private UUID serviceId;
+  @Id private UUID id;
   private String serviceName;
 
   @Builder.Default
