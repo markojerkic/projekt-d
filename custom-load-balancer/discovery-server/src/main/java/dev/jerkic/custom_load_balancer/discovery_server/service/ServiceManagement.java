@@ -3,8 +3,8 @@ package dev.jerkic.custom_load_balancer.discovery_server.service;
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceInstance;
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceModel;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceInstanceRepository;
-import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceRepository;
-import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceRepository.ServiceModelProjection;
+import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
+import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository.ServiceModelProjection;
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
@@ -23,7 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Slf4j
 @RequiredArgsConstructor
 public class ServiceManagement implements ServiceHealthService {
-  private final ServiceRepository serviceModelRepository;
+  private final ServiceModelRepository serviceModelRepository;
   private final ServiceInstanceRepository serviceInstanceRepository;
 
   @Override

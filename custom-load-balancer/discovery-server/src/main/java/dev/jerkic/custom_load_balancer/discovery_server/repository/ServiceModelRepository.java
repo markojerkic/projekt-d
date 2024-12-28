@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 
-public interface ServiceRepository extends CrudRepository<ServiceModel, String> {
+public interface ServiceModelRepository extends CrudRepository<ServiceModel, String> {
   public interface ServiceModelProjection {
     String getId();
 
