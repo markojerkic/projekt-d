@@ -44,10 +44,9 @@ public class DiscoveryServiceConfiguration {
             .serviceHealth(this.getServiceHealth())
             .build();
 
-    log.info("Registering server with service discovery with input: {}", registerInput);
     try {
-      var serviceId = this.clientHealthService.registerService(registerInput);
-      log.info("Registered service, id is {}", serviceId);
+      var instanceId = this.clientHealthService.registerService(registerInput);
+      log.info("Registered service, id is {}", instanceId);
     } catch (Exception e) {
       log.error("Error registering service. Going to after 10s");
 
@@ -69,7 +68,8 @@ public class DiscoveryServiceConfiguration {
 
       var oInstanceId = this.clientHealthService.getInstanceId();
       if (oInstanceId.isEmpty()) {
-        throw new IllegalStateException("Service not registered");
+        log.warn("Service not registered");
+        return;
       }
       var instanceId = oInstanceId.get();
 

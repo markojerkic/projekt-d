@@ -17,7 +17,8 @@ import org.springframework.web.client.RestTemplate;
 public class ClientHealthService implements ServiceHealthService {
   private final ClientProperties clientProperties;
   private final RestTemplate restTemplate = new RestTemplate();
-  private final AtomicReference<String> instanceId = new AtomicReference<>();
+  private final AtomicReference<Optional<String>> instanceId =
+      new AtomicReference<>(Optional.empty());
 
   @Override
   public String registerService(RegisterInput registerInput) {
@@ -30,7 +31,7 @@ public class ClientHealthService implements ServiceHealthService {
             registerInput,
             String.class);
 
-    this.instanceId.set(instanceId);
+    this.instanceId.set(Optional.ofNullable(instanceId));
     return instanceId;
   }
 
@@ -43,6 +44,6 @@ public class ClientHealthService implements ServiceHealthService {
   }
 
   public Optional<String> getInstanceId() {
-    return Optional.ofNullable(this.instanceId.get());
+    return Optional.ofNullable(this.instanceId.get().get());
   }
 }

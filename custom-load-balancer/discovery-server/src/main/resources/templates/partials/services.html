@@ -51,7 +51,9 @@
       <span th:text="${serviceInstance.instanceId}"></span>
 
       <span class="font-semibold">Timestamp:</span>
-      <span th:text="${serviceInstance.timestamp}"></span>
+      <time
+        th:text="${#temporals.format(serviceInstance.timestamp, 'yyyy-MM-dd HH:mm:ss')}"
+      ></time>
 
       <span class="font-semibold">Health:</span>
       <span
@@ -59,9 +61,10 @@
       ></span>
 
       <span class="font-semibold">Connections:</span>
-      <time
-        th:text="${#temporals.format(serviceInstance.timestamp, 'yyyy-MM-dd HH:mm:ss')}"
-      ></time>
+      <span th:text="${serviceInstance.numberOfConnections}"></span>
+
+      <span class="font-semibold">Address:</span>
+      <span th:text="${serviceInstance.address}"></span>
     </li>
   </ul>
 </div>
