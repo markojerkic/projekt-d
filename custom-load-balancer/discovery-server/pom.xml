@@ -37,15 +37,6 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
-        <!--ZA
-        OBRISATI -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-        <!--ZA
-        OBRISATI -->
-
         <!-- SQLite JDBC Driver -->
         <dependency>
             <groupId>org.xerial</groupId>
@@ -70,12 +61,6 @@
             <version>3.5.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-docker-compose</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
