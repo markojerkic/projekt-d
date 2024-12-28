@@ -14,7 +14,7 @@ public interface ServiceInstanceRepository
         PagingAndSortingRepository<ServiceInstance, UUID> {
   List<ServiceInstance> findByServiceModel_id(UUID serviceId);
 
-  Optional<ServiceInstance> findByInstanceId(UUID instanceId);
+  Optional<ServiceInstance> findFirstByInstanceId(UUID instanceId);
 
   /**
    * Find all instances of a service which are healthy. Return only the latest instance, grouped by

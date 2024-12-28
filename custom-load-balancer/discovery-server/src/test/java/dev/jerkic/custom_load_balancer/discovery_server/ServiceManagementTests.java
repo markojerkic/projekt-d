@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceInstance;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceInstanceRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.service.ServiceManagement;
@@ -48,7 +49,7 @@ public class ServiceManagementTests {
     assertNotNull(instanceId);
 
     var instance =
-        this.serviceInstanceRepository.findByInstanceId(UUID.fromString(instanceId)).get();
+        this.serviceInstanceRepository.findFirstByInstanceId(UUID.fromString(instanceId)).get();
 
     assertNotNull(instance);
     assertEquals(serviceName, instance.getServiceModel().getServiceName());
@@ -117,6 +118,19 @@ public class ServiceManagementTests {
 
     assertEquals(1, this.serviceModelRepository.count());
     assertEquals(2, this.serviceInstanceRepository.count());
+
+    var serviceModel =
+        this.serviceInstanceRepository
+            .findFirstByInstanceId(UUID.fromString(instanceId))
+            .map(ServiceInstance::getServiceModel)
+            .get();
+
+    assertNotNull(serviceModel);
+
+    var serviceInstances =
+        this.serviceManagement.getInstacesForService(serviceModel.getId().toString());
+
+    assertEquals(1, serviceInstances.size());
   }
 
   private ServiceHealthInput getServiceHealth(String port, boolean isHealthy, String serviceName) {

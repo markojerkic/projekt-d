@@ -67,7 +67,7 @@ public class ServiceManagement implements ServiceHealthService {
   public void updateHealth(HealthUpdateInput healthUpdateInput) {
     var service =
         this.serviceInstanceRepository
-            .findByInstanceId(UUID.fromString(healthUpdateInput.getInstanceId()))
+            .findFirstByInstanceId(UUID.fromString(healthUpdateInput.getInstanceId()))
             .map(ServiceInstance::getServiceModel)
             .orElseThrow(
                 () ->
