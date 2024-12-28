@@ -7,13 +7,11 @@ import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelR
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
-import java.time.Duration;
-import java.time.Instant;
+import java.sql.Date;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +56,7 @@ public class ServiceManagement implements ServiceHealthService {
             // empty shell only containing PK for JPA to connect them
             .serviceModel(serviceModel)
             .isHealthy(registerInput.getServiceHealth().isHealthy())
-            .timestamp(registerInput.getServiceHealth().getTimestamp())
+            .timestamp(Date.from(registerInput.getServiceHealth().getTimestamp()))
             .address(registerInput.getServiceHealth().getAddress())
             .numberOfConnections(registerInput.getServiceHealth().getNumberOfConnections())
             .build();
@@ -86,7 +84,7 @@ public class ServiceManagement implements ServiceHealthService {
                 .serviceModel(ServiceModel.builder().id(service.getId()).build())
                 .instanceId(UUID.fromString(healthUpdateInput.getInstanceId()))
                 .address(healthUpdateInput.getHealth().getAddress())
-                .timestamp(healthUpdateInput.getHealth().getTimestamp())
+                .timestamp(Date.from(healthUpdateInput.getHealth().getTimestamp()))
                 .numberOfConnections(healthUpdateInput.getHealth().getNumberOfConnections())
                 .isHealthy(healthUpdateInput.getHealth().isHealthy())
                 .build());
@@ -144,24 +142,17 @@ public class ServiceManagement implements ServiceHealthService {
   private Function<List<ServiceInstance>, ServiceInstance> extractLatestInstace() {
     return serviceInstances -> {
       return serviceInstances.stream()
-          .filter(this.isOlderThanMinutes(2).negate())
-          .reduce(
-              (first, second) -> {
-                if (first.getTimestamp().isAfter(second.getTimestamp())) {
-                  return first;
-                } else {
-                  return second;
-                }
-              })
+          .findFirst()
+          // .filter(this.isOlderThanMinutes(2).negate())
+          // .reduce(
+          //    (first, second) -> {
+          //      if (first.getTimestamp().isAfter(second.getTimestamp())) {
+          //        return first;
+          //      } else {
+          //        return second;
+          //      }
+          //    })
           .get();
-    };
-  }
-
-  private Predicate<ServiceInstance> isOlderThanMinutes(int minutes) {
-    return (instance) -> {
-      var minutesAgo = Instant.now().minus(Duration.ofMinutes(minutes));
-
-      return instance.getTimestamp().isBefore(minutesAgo);
     };
   }
 }

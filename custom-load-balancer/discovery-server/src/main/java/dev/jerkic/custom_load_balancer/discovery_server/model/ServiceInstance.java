@@ -7,7 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.Instant;
+import java.util.Date;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,7 +35,7 @@ public class ServiceInstance {
   private boolean isHealthy;
   private String address;
   private Long numberOfConnections;
-  private Instant timestamp;
+  private Date timestamp;
 
   @ManyToOne(fetch = FetchType.LAZY)
   private ServiceModel serviceModel;
