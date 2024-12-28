@@ -9,10 +9,7 @@ import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
 import java.sql.Date;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -84,7 +81,9 @@ public class ServiceManagement implements ServiceHealthService {
         this.serviceInstanceRepository.save(
             ServiceInstance.builder()
                 // empty shell only containing PK for JPA to connect them
-                .serviceModel(ServiceModel.builder().id(service.getId()).build())
+                .entryId(UUID.randomUUID())
+                // .serviceModel(ServiceModel.builder().id(service.getId()).build())
+                .serviceModel(service)
                 .instanceId(UUID.fromString(healthUpdateInput.getInstanceId()))
                 .address(healthUpdateInput.getHealth().getAddress())
                 .instanceRecordedAt(Date.from(healthUpdateInput.getHealth().getTimestamp()))
@@ -110,15 +109,7 @@ public class ServiceManagement implements ServiceHealthService {
    * @return collection of instances
    */
   public Collection<ServiceInstance> getInstacesForService(String serviceId) {
-    var instances =
-        this.serviceInstanceRepository.findLatestForServiceId(UUID.fromString(serviceId));
-
-    var groupedByInstanceId =
-        instances.stream().collect(Collectors.groupingBy(ServiceInstance::getInstanceId));
-
-    return groupedByInstanceId.values().stream()
-        .map(extractLatestInstace())
-        .collect(Collectors.toList());
+    return this.serviceInstanceRepository.findLatestForServiceId(UUID.fromString(serviceId));
   }
 
   public ServiceModel getServiceInfo(String serviceId) {
@@ -140,28 +131,5 @@ public class ServiceManagement implements ServiceHealthService {
         delete from service_instance where
         strftime('%s', 'now') * 1000 - service_instance.instance_recorded_at >= 3*60*1000;
         """);
-  }
-
-  /**
-   * Extract latest instance from collection of instances by reducing them to the one with the
-   * latest
-   *
-   * @return function that extracts latest instance
-   */
-  private Function<List<ServiceInstance>, ServiceInstance> extractLatestInstace() {
-    return serviceInstances -> {
-      return serviceInstances.stream()
-          .findFirst()
-          // .filter(this.isOlderThanMinutes(2).negate())
-          // .reduce(
-          //    (first, second) -> {
-          //      if (first.getTimestamp().isAfter(second.getTimestamp())) {
-          //        return first;
-          //      } else {
-          //        return second;
-          //      }
-          //    })
-          .get();
-    };
   }
 }

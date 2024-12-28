@@ -56,7 +56,7 @@ public class DiscoveryServiceConfiguration {
                 log.info("Retrying registration");
                 register();
               },
-              30,
+              10,
               TimeUnit.SECONDS);
     }
   }
