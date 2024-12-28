@@ -3,10 +3,10 @@ package dev.jerkic.custom_load_balancer.discovery_server.repository;
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceInstance;
 import java.util.List;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface ServiceInstanceRepository
     extends CrudRepository<ServiceInstance, UUID>,
@@ -20,12 +20,20 @@ public interface ServiceInstanceRepository
    * @param serviceId service id
    * @return page of healthy instances
    */
-  // @Query(
-  //    value =
-  //        """
-  //        SELECT * FROM service_instance
-  //        WHERE service_id = :serviceId AND is_healthy = true
-  //        GROUP BY instance_id
-  //        """)
-  Page<ServiceInstance> findByServiceModel_idAndIsHealthyTrue(UUID serviceId, Pageable pageable);
+  @Query(
+      value =
+          """
+        select si
+         from ServiceInstance si
+                  join (select s.instanceId as instanceId, max(s.instanceRecordedAt) as latest_timestamp
+                        from ServiceInstance s
+                        where s.serviceModel.id = :serviceId
+                          and s.isHealthy = true
+                          and s.instanceRecordedAt >= :cutoffTime
+                        group by s.instanceId) latest
+                       on si.instanceId = latest.instanceId
+       order by si.instanceRecordedAt desc, si.numberOfConnections asc
+""")
+  List<ServiceInstance> findLatestForServiceId(
+      @Param("serviceId") UUID serviceId, @Param("cutoffTime") Long cutoffTime);
 }

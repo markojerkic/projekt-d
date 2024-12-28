@@ -15,8 +15,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -107,14 +105,11 @@ public class ServiceManagement implements ServiceHealthService {
    * @return collection of instances
    */
   public Collection<ServiceInstance> getInstacesForService(String serviceId) {
+    var fiveMinutesCutoffTime = System.currentTimeMillis() - (5 * 60 * 1000);
+
     var instances =
-        this.serviceInstanceRepository.findByServiceModel_idAndIsHealthyTrue(
-            UUID.fromString(serviceId),
-            PageRequest.of(
-                0,
-                10,
-                Sort.by(
-                    Sort.Order.desc("instanceRecordedAt"), Sort.Order.asc("numberOfConnections"))));
+        this.serviceInstanceRepository.findLatestForServiceId(
+            UUID.fromString(serviceId), fiveMinutesCutoffTime);
 
     var groupedByInstanceId =
         instances.stream().collect(Collectors.groupingBy(ServiceInstance::getInstanceId));
