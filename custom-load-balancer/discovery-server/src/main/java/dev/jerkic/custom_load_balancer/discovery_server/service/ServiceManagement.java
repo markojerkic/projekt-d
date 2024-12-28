@@ -114,15 +114,15 @@ public class ServiceManagement implements ServiceHealthService {
         select si.*
         from service_instance si
         join (
-            select s.instance_id, max(s.instance_recorded_at) as latest_timestamp
+            select s.entry_id, max(s.instance_recorded_at) as latest_timestamp
             from service_instance s
             where s.service_model_id = :serviceId
               and s.is_healthy is true
               and strftime('%s', 'now') * 1000 - s.instance_recorded_at
-              >= 3*60*1000
+              <= 3*60*1000
             group by s.instance_id
         ) latest
-        on si.instance_id = latest.instance_id
+        on si.entry_id = latest.entry_id
         order by si.instance_recorded_at desc, si.number_of_connections asc
         """,
         (rs, _) -> {
@@ -131,8 +131,8 @@ public class ServiceManagement implements ServiceHealthService {
               .instanceId(rs.getString("instance_id"))
               .isHealthy(rs.getBoolean("is_healthy"))
               .address(rs.getString("address"))
-              .numberOfConnections(rs.getLong("numberOfConnections"))
-              .instanceRecordedAt(rs.getDate("instanceRecordedAt"))
+              .numberOfConnections(rs.getLong("number_of_connections"))
+              .instanceRecordedAt(rs.getDate("instance_recorded_at"))
               .build();
         },
         serviceId);
