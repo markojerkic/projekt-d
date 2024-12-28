@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Reference;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.index.Indexed;
 
 @RedisHash("service")
 @Builder
@@ -19,7 +20,7 @@ import org.springframework.data.redis.core.RedisHash;
 @NoArgsConstructor
 public class ServiceModel {
   @Id private String id;
-  private String serviceName;
+  @Indexed private String serviceName;
   // Collection of service instances
   @Builder.Default @Reference private Set<ServiceInstance> instances = new HashSet<>();
 }

@@ -23,15 +23,26 @@
     class="text-2xl font-bold text-center mb-4"
     th:text="${serviceInfo.serviceName}"
   ></h2>
-  <ul th:object="${instances}">
+  <ul th:object="${instances}" class="gap-2">
     <li
       th:each="serviceInstance: ${instances}"
-      class="text-lg mb-2 grid grid-cols-2"
+      class="text-lg mb-2 grid grid-cols-2 border-b border-black"
     >
+      <span class="font-semibold">Instance ID:</span>
       <span th:text="${serviceInstance.instanceId}"></span>
-      <span th:text="${serviceInstance.lastUpdateTimestamp}"></span>
-      <span th:text="${serviceInstance.health}"></span>
-      <span th:text="${serviceInstance.connections}"></span>
+
+      <span class="font-semibold">Timestamp:</span>
+      <span th:text="${serviceInstance.timestamp}"></span>
+
+      <span class="font-semibold">Health:</span>
+      <span
+        th:text="${serviceInstance.isHealthy? 'Healthy': 'Not healthy'}"
+      ></span>
+
+      <span class="font-semibold">Connections:</span>
+      <time
+        th:text="${#temporals.format(serviceInstance.timestamp, 'yyyy-MM-dd HH:mm:ss')}"
+      ></time>
     </li>
   </ul>
 </div>
