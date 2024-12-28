@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" hx-boost="true">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Redis realtime chat</title>
+    <script src="https://unpkg.com/htmx.org@2.0.3"
+        integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<style>
+    [popover] {
+        display: none;
+
+
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        &:popover-open {
+            display: flex;
+            align-items: center;
+        }
+    }
+</style>
+
+<nav class="bg-blue-800 p-4">
+    <div class="container mx-auto flex justify-between items-center">
+        <a href="#" class="text-white text-2xl">Services</a>
+        <!--<a href="/auth/logout" class="text-white justify-self-end">Logout</a>-->
+    </div>
+</nav>
+
+<body>
+
+    <h1>Services</h1>
+
+</body>
+
+
+</html>
+
