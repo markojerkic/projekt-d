@@ -16,7 +16,6 @@ public class ServiceController {
   @GetMapping
   public String index(Model model) {
     model.addAttribute("services", serviceManagement.getServices());
-
     return "index";
   }
 }
