@@ -138,7 +138,7 @@ public class ServiceManagement implements ServiceHealthService {
   private Function<List<ServiceInstance>, ServiceInstance> extractLatestInstace() {
     return serviceInstances -> {
       return serviceInstances.stream()
-          .filter(this.isOlderThanMinutes(2))
+          .filter(this.isOlderThanMinutes(2).negate())
           .reduce(
               (first, second) -> {
                 if (first.getTimestamp().isAfter(second.getTimestamp())) {
@@ -155,7 +155,7 @@ public class ServiceManagement implements ServiceHealthService {
     return (instance) -> {
       var minutesAgo = Instant.now().minus(Duration.ofMinutes(minutes));
 
-      return instance.getTimestamp().isAfter(minutesAgo);
+      return instance.getTimestamp().isBefore(minutesAgo);
     };
   }
 }
