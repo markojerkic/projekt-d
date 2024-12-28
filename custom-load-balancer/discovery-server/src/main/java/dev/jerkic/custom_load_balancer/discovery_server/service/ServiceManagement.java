@@ -33,25 +33,30 @@ public class ServiceManagement implements ServiceHealthService {
   private final ServiceInstanceRepository serviceInstanceRepository;
 
   @Override
+  @Transactional
   public String registerService(RegisterInput registerInput) {
 
     var serviceInfo = registerInput.getServiceInfo();
     var registeredService =
         this.serviceModelRepository.findByServiceName(serviceInfo.getServiceName());
 
-    UUID serviceId;
+    ServiceModel serviceModel;
     if (!registeredService.isPresent()) {
-      var service = ServiceModel.builder().serviceName(serviceInfo.getServiceName()).build();
-      serviceId = this.serviceModelRepository.save(service).getId();
+      var service =
+          ServiceModel.builder()
+              .id(UUID.randomUUID())
+              .serviceName(serviceInfo.getServiceName())
+              .build();
+      serviceModel = this.serviceModelRepository.save(service);
     } else {
-      serviceId = registeredService.map(ServiceModel::getId).get();
+      serviceModel = registeredService.get();
     }
 
     var instance =
         ServiceInstance.builder()
             .instanceId(UUID.randomUUID().toString())
             // empty shell only containing PK for JPA to connect them
-            .serviceModel(ServiceModel.builder().id(serviceId).build())
+            .serviceModel(serviceModel)
             .isHealthy(registerInput.getServiceHealth().isHealthy())
             .timestamp(registerInput.getServiceHealth().getTimestamp())
             .address(registerInput.getServiceHealth().getAddress())
@@ -122,7 +127,7 @@ public class ServiceManagement implements ServiceHealthService {
 
   public ServiceModelLazyProjection getServiceInfo(String serviceId) {
     return this.serviceModelRepository
-        .findProjectionById(serviceId)
+        .findProjectionById(UUID.fromString(serviceId))
         .orElseThrow(
             () ->
                 new ResponseStatusException(

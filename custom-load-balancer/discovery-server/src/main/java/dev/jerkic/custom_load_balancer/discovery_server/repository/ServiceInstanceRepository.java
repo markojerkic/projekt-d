@@ -11,7 +11,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 public interface ServiceInstanceRepository
     extends CrudRepository<ServiceInstance, UUID>,
         PagingAndSortingRepository<ServiceInstance, UUID> {
-  List<ServiceInstance> findByServiceModel_id(String serviceId);
+  List<ServiceInstance> findByServiceModel_id(UUID serviceId);
 
   /**
    * Find all instances of a service which are healthy. Return only the latest instance, grouped by
