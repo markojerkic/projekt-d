@@ -66,4 +66,18 @@ public class ServiceManagement implements ServiceHealthService {
   public Iterable<ServiceModel> getServices() {
     return this.serviceModelRepository.findAll();
   }
+
+  public Iterable<ServiceInstance> getInstacesForService(String serviceId) {
+    return this.serviceInstanceRepository.findByServiceId(serviceId);
+  }
+
+  public ServiceModel getServiceInfo(String serviceId) {
+    return this.serviceModelRepository
+        .findById(serviceId)
+        .orElseThrow(
+            () ->
+                new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    String.format("Service with id '%s' not found", serviceId)));
+  }
 }

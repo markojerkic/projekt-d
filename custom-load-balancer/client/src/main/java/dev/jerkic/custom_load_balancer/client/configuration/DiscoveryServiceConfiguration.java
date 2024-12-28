@@ -49,23 +49,29 @@ public class DiscoveryServiceConfiguration {
   // Define cron job for every 1 min
   @Scheduled(fixedRate = 60000)
   public void updateHealth() {
+    try {
 
-    var oServiceId = this.clientHealthService.getServiceId();
-    if (oServiceId.isEmpty()) {
-      throw new IllegalStateException("Service not registered");
+      var oServiceId = this.clientHealthService.getServiceId();
+      if (oServiceId.isEmpty()) {
+        throw new IllegalStateException("Service not registered");
+      }
+      var serviceId = oServiceId.get();
+
+      var healthStatus =
+          HealthUpdateInput.builder()
+              .serviceId(serviceId)
+              .serviceName(this.clientProperties.getServiceName())
+              .health(this.getServiceHealth())
+              .build();
+
+      log.info("Updating health: {}", healthStatus);
+
+      this.clientHealthService.updateHealth(healthStatus);
+    } catch (Exception e) {
+      log.error("Error updating health", e);
+      log.warn("Trying to register again after failed health udpate");
+      this.register();
     }
-    var serviceId = oServiceId.get();
-
-    var healthStatus =
-        HealthUpdateInput.builder()
-            .serviceId(serviceId)
-            .serviceName(this.clientProperties.getServiceName())
-            .health(this.getServiceHealth())
-            .build();
-
-    log.info("Updating health: {}", healthStatus);
-
-    this.clientHealthService.updateHealth(healthStatus);
   }
 
   private final ServiceInfo getServiceInfo() {

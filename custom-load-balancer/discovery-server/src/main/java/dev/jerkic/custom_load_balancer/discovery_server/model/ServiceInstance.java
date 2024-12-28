@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.index.Indexed;
 
 @RedisHash("service_instance")
 @Builder
@@ -16,7 +17,8 @@ import org.springframework.data.redis.core.RedisHash;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ServiceInstance {
-  @Id private String serviceId;
+  @Id private String instanceId;
+  @Indexed private String serviceId;
   private boolean isHealthy;
   private Long numberOfConnections;
   private Instant timestamp;
