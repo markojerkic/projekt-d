@@ -48,8 +48,7 @@ public class ServiceManagementTests {
     var instanceId = this.serviceManagement.registerService(registerInput);
     assertNotNull(instanceId);
 
-    var instance =
-        this.serviceInstanceRepository.findFirstByInstanceId(UUID.fromString(instanceId)).get();
+    var instance = this.serviceInstanceRepository.findFirstByInstanceId(instanceId).get();
 
     assertNotNull(instance);
     assertEquals(serviceName, instance.getServiceModel().getServiceName());
@@ -121,7 +120,7 @@ public class ServiceManagementTests {
 
     var serviceModel =
         this.serviceInstanceRepository
-            .findFirstByInstanceId(UUID.fromString(instanceId))
+            .findFirstByInstanceId(instanceId)
             .map(ServiceInstance::getServiceModel)
             .get();
 

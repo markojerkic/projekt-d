@@ -3,18 +3,17 @@ package dev.jerkic.custom_load_balancer.discovery_server.repository;
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceInstance;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 public interface ServiceInstanceRepository
-    extends CrudRepository<ServiceInstance, UUID>,
-        PagingAndSortingRepository<ServiceInstance, UUID> {
-  List<ServiceInstance> findByServiceModel_id(UUID serviceId);
+    extends CrudRepository<ServiceInstance, String>,
+        PagingAndSortingRepository<ServiceInstance, String> {
+  List<ServiceInstance> findByServiceModel_id(String serviceId);
 
-  Optional<ServiceInstance> findFirstByInstanceId(UUID instanceId);
+  Optional<ServiceInstance> findFirstByInstanceId(String instanceId);
 
   /**
    * Find all instances of a service which are healthy. Return only the latest instance, grouped by
@@ -41,5 +40,5 @@ public interface ServiceInstanceRepository
           order by si.instance_recorded_at desc, si.number_of_connections asc
           """,
       nativeQuery = true)
-  List<ServiceInstance> findLatestForServiceId(@Param("serviceId") UUID serviceId);
+  List<ServiceInstance> findLatestForServiceId(@Param("serviceId") String serviceId);
 }

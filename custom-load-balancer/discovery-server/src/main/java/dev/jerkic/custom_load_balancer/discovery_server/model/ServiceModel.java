@@ -1,13 +1,11 @@
 package dev.jerkic.custom_load_balancer.discovery_server.model;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,9 +21,7 @@ import lombok.ToString;
 @ToString(exclude = "instances")
 @EqualsAndHashCode(exclude = "instances")
 public class ServiceModel {
-  @Id
-  @Column(columnDefinition = "TEXT")
-  private UUID id;
+  @Id private String id;
 
   private String serviceName;
 

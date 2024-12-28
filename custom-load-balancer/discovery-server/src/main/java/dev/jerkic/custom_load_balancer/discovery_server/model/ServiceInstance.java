@@ -1,6 +1,5 @@
 package dev.jerkic.custom_load_balancer.discovery_server.model;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -8,7 +7,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.Date;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,12 +29,9 @@ import lombok.ToString;
 @ToString(exclude = "serviceModel")
 @EqualsAndHashCode(exclude = "serviceModel")
 public class ServiceInstance {
-  @Id
-  @Column(columnDefinition = "TEXT")
-  private UUID entryId;
+  @Id private String entryId;
 
-  @Column(columnDefinition = "TEXT")
-  private UUID instanceId;
+  private String instanceId;
 
   private boolean isHealthy;
   private String address;

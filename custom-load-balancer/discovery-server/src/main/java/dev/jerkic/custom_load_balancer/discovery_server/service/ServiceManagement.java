@@ -39,7 +39,7 @@ public class ServiceManagement implements ServiceHealthService {
     if (!registeredService.isPresent()) {
       var service =
           ServiceModel.builder()
-              .id(UUID.randomUUID())
+              .id(UUID.randomUUID().toString())
               .serviceName(serviceInfo.getServiceName())
               .build();
       serviceModel = this.serviceModelRepository.save(service);
@@ -49,8 +49,8 @@ public class ServiceManagement implements ServiceHealthService {
 
     var instance =
         ServiceInstance.builder()
-            .entryId(UUID.randomUUID())
-            .instanceId(UUID.randomUUID())
+            .entryId(UUID.randomUUID().toString())
+            .instanceId(UUID.randomUUID().toString())
             // empty shell only containing PK for JPA to connect them
             .serviceModel(serviceModel)
             .isHealthy(registerInput.getServiceHealth().isHealthy())
@@ -67,7 +67,7 @@ public class ServiceManagement implements ServiceHealthService {
   public void updateHealth(HealthUpdateInput healthUpdateInput) {
     var service =
         this.serviceInstanceRepository
-            .findFirstByInstanceId(UUID.fromString(healthUpdateInput.getInstanceId()))
+            .findFirstByInstanceId(healthUpdateInput.getInstanceId())
             .map(ServiceInstance::getServiceModel)
             .orElseThrow(
                 () ->
@@ -81,10 +81,10 @@ public class ServiceManagement implements ServiceHealthService {
         this.serviceInstanceRepository.save(
             ServiceInstance.builder()
                 // empty shell only containing PK for JPA to connect them
-                .entryId(UUID.randomUUID())
+                .entryId(UUID.randomUUID().toString())
                 // .serviceModel(ServiceModel.builder().id(service.getId()).build())
                 .serviceModel(service)
-                .instanceId(UUID.fromString(healthUpdateInput.getInstanceId()))
+                .instanceId(healthUpdateInput.getInstanceId())
                 .address(healthUpdateInput.getHealth().getAddress())
                 .instanceRecordedAt(Date.from(healthUpdateInput.getHealth().getTimestamp()))
                 .numberOfConnections(healthUpdateInput.getHealth().getNumberOfConnections())
@@ -109,12 +109,38 @@ public class ServiceManagement implements ServiceHealthService {
    * @return collection of instances
    */
   public Collection<ServiceInstance> getInstacesForService(String serviceId) {
-    return this.serviceInstanceRepository.findLatestForServiceId(UUID.fromString(serviceId));
+    return this.jdbcTemplate.query(
+        """
+        select si.*
+        from service_instance si
+        join (
+            select s.instance_id, max(s.instance_recorded_at) as latest_timestamp
+            from service_instance s
+            where s.service_model_id = :serviceId
+              and s.is_healthy is true
+              and strftime('%s', 'now') * 1000 - s.instance_recorded_at
+              >= 3*60*1000
+            group by s.instance_id
+        ) latest
+        on si.instance_id = latest.instance_id
+        order by si.instance_recorded_at desc, si.number_of_connections asc
+        """,
+        (rs, _) -> {
+          return ServiceInstance.builder()
+              .entryId(rs.getString("entry_id"))
+              .instanceId(rs.getString("instance_id"))
+              .isHealthy(rs.getBoolean("is_healthy"))
+              .address(rs.getString("address"))
+              .numberOfConnections(rs.getLong("numberOfConnections"))
+              .instanceRecordedAt(rs.getDate("instanceRecordedAt"))
+              .build();
+        },
+        serviceId);
   }
 
   public ServiceModel getServiceInfo(String serviceId) {
     return this.serviceModelRepository
-        .findById(UUID.fromString(serviceId))
+        .findById(serviceId)
         .orElseThrow(
             () ->
                 new ResponseStatusException(
