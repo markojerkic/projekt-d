@@ -11,6 +11,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
@@ -20,6 +21,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @Entity
 @ToString(exclude = "instances")
+@EqualsAndHashCode(exclude = "instances")
 public class ServiceModel {
   @Id
   @Column(columnDefinition = "TEXT")

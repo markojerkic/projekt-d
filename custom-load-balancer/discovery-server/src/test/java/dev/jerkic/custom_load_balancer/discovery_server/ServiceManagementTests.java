@@ -85,10 +85,38 @@ public class ServiceManagementTests {
         () -> {
           this.serviceManagement.updateHealth(
               HealthUpdateInput.builder()
+                  .instanceId(UUID.randomUUID().toString())
                   .serviceName(healthUpdate.getServiceName())
                   .health(healthUpdate)
                   .build());
         });
+
+    assertEquals(0, this.serviceModelRepository.count());
+    assertEquals(0, this.serviceInstanceRepository.count());
+  }
+
+  @Test
+  public void testUpdateHeath() {
+    // Register
+    var serviceName = "test-service";
+    var registerInput =
+        RegisterInput.builder()
+            .serviceInfo(this.getServiceInfo(serviceName))
+            .serviceHealth(this.getServiceHealth("8090", true, serviceName))
+            .build();
+
+    var instanceId = this.serviceManagement.registerService(registerInput);
+
+    var healthUpdate = this.getServiceHealth("8090", true, serviceName);
+    this.serviceManagement.updateHealth(
+        HealthUpdateInput.builder()
+            .instanceId(instanceId)
+            .serviceName(healthUpdate.getServiceName())
+            .health(healthUpdate)
+            .build());
+
+    assertEquals(1, this.serviceModelRepository.count());
+    assertEquals(2, this.serviceInstanceRepository.count());
   }
 
   private ServiceHealthInput getServiceHealth(String port, boolean isHealthy, String serviceName) {
