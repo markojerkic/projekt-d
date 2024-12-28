@@ -71,6 +71,7 @@ public class ServiceManagement implements ServiceHealthService {
     var newInstance =
         this.serviceInstanceRepository.save(
             ServiceInstance.builder()
+                .serviceId(service.getId())
                 .timestamp(healthUpdateInput.getHealth().getTimestamp())
                 .numberOfConnections(healthUpdateInput.getHealth().getNumberOfConnections())
                 .isHealthy(healthUpdateInput.getHealth().isHealthy())
