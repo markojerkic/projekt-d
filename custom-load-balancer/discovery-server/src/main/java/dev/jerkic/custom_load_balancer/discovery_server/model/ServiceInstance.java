@@ -1,5 +1,6 @@
 package dev.jerkic.custom_load_balancer.discovery_server.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -26,7 +27,10 @@ import lombok.NoArgsConstructor;
           columnList = "timestamp DESC, isHealthy")
     })
 public class ServiceInstance {
-  @Id private UUID entryId;
+  @Id
+  @Column(columnDefinition = "TEXT")
+  private UUID entryId;
+
   private UUID instanceId;
   private boolean isHealthy;
   private String address;

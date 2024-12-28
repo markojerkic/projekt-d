@@ -1,5 +1,6 @@
 package dev.jerkic.custom_load_balancer.discovery_server.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -18,7 +19,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 public class ServiceModel {
-  @Id private UUID id;
+  @Id
+  @Column(columnDefinition = "TEXT")
+  private UUID id;
+
   private String serviceName;
 
   @Builder.Default
