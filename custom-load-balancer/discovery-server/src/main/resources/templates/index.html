@@ -12,7 +12,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
 
-  <style>
+  <style th:fragment="styles">
+    .htmx-indicator {
+      display: none;
+    }
+    .htmx-request .htmx-indicator {
+      display: inline;
+    }
+    .htmx-request.htmx-indicator {
+      display: inline;
+    }
+
     [popover] {
       display: none;
 

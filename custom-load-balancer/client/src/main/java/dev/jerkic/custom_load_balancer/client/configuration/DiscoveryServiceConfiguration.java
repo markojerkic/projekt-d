@@ -42,8 +42,18 @@ public class DiscoveryServiceConfiguration {
             .build();
 
     log.info("Registering server with service discovery with input: {}", registerInput);
-    var serviceId = this.clientHealthService.registerService(registerInput);
-    log.info("Registered service, id is {}", serviceId);
+    try {
+      var serviceId = this.clientHealthService.registerService(registerInput);
+      log.info("Registered service, id is {}", serviceId);
+    } catch (Exception e) {
+      log.error("Error registering service. Going to after 10s");
+      try {
+        Thread.sleep(10000);
+      } catch (InterruptedException ex) {
+        log.error("Error sleeping thread", ex);
+      }
+      this.register();
+    }
   }
 
   // Define cron job for every 1 min

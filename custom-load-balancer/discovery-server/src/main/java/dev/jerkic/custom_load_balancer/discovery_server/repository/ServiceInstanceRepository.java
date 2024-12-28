@@ -12,5 +12,11 @@ public interface ServiceInstanceRepository
         PagingAndSortingRepository<ServiceInstance, String> {
   List<ServiceInstance> findByServiceId(String serviceId);
 
+  /**
+   * Find all instances of a service which are healthy
+   *
+   * @param serviceId service id
+   * @return page of healthy instances
+   */
   Page<ServiceInstance> findByServiceId(String serviceId, Pageable pageable);
 }
