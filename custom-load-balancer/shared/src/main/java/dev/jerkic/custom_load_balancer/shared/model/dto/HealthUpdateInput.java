@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class HealthUpdateInput {
-  private String serviceId;
+  private String instanceId;
   private String serviceName;
   private ServiceHealthInput health;
 }

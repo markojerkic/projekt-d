@@ -51,15 +51,15 @@ public class DiscoveryServiceConfiguration {
   public void updateHealth() {
     try {
 
-      var oServiceId = this.clientHealthService.getServiceId();
-      if (oServiceId.isEmpty()) {
+      var oInstanceId = this.clientHealthService.getInstanceId();
+      if (oInstanceId.isEmpty()) {
         throw new IllegalStateException("Service not registered");
       }
-      var serviceId = oServiceId.get();
+      var instanceId = oInstanceId.get();
 
       var healthStatus =
           HealthUpdateInput.builder()
-              .serviceId(serviceId)
+              .instanceId(instanceId)
               .serviceName(this.clientProperties.getServiceName())
               .health(this.getServiceHealth())
               .build();

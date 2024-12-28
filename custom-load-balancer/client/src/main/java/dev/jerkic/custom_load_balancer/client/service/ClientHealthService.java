@@ -17,21 +17,21 @@ import org.springframework.web.client.RestTemplate;
 public class ClientHealthService implements ServiceHealthService {
   private final ClientProperties clientProperties;
   private final RestTemplate restTemplate = new RestTemplate();
-  private final AtomicReference<String> serviceId = new AtomicReference<>();
+  private final AtomicReference<String> instanceId = new AtomicReference<>();
 
   @Override
   public String registerService(RegisterInput registerInput) {
     log.info(
         "Registering service with discovery server at {}",
         this.clientProperties.getDiscoveryServerUrl() + "/register");
-    var serviceId =
+    var instanceId =
         this.restTemplate.postForObject(
             this.clientProperties.getDiscoveryServerUrl() + "/register",
             registerInput,
             String.class);
 
-    this.serviceId.set(serviceId);
-    return serviceId;
+    this.instanceId.set(instanceId);
+    return instanceId;
   }
 
   @Override
@@ -42,7 +42,7 @@ public class ClientHealthService implements ServiceHealthService {
         this.clientProperties.getDiscoveryServerUrl() + "/health", healthUpdateInput, Void.class);
   }
 
-  public Optional<String> getServiceId() {
-    return Optional.ofNullable(this.serviceId.get());
+  public Optional<String> getInstanceId() {
+    return Optional.ofNullable(this.instanceId.get());
   }
 }

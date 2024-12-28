@@ -17,7 +17,8 @@ import org.springframework.data.redis.core.index.Indexed;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ServiceInstance {
-  @Id private String instanceId;
+  @Id private String entryId;
+  @Indexed private String instanceId;
   @Indexed private String serviceId;
   private boolean isHealthy;
   private Long numberOfConnections;

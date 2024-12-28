@@ -7,6 +7,7 @@ import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceReposi
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -28,12 +29,25 @@ public class ServiceManagement implements ServiceHealthService {
     var registeredService =
         this.serviceModelRepository.findByServiceName(serviceInfo.getServiceName());
 
-    if (registeredService.isPresent()) {
-      return registeredService.map(ServiceModel::getServiceName).get();
+    String serviceId;
+    if (!registeredService.isPresent()) {
+      var service = ServiceModel.builder().serviceName(serviceInfo.getServiceName()).build();
+      this.serviceModelRepository.save(service).getId();
+      serviceId = service.getId();
+    } else {
+      serviceId = registeredService.map(ServiceModel::getId).get();
     }
 
-    var service = ServiceModel.builder().serviceName(serviceInfo.getServiceName()).build();
-    return this.serviceModelRepository.save(service).getId();
+    var instance =
+        ServiceInstance.builder()
+            .instanceId(UUID.randomUUID().toString())
+            .serviceId(serviceId)
+            .isHealthy(registerInput.getServiceHealth().isHealthy())
+            .timestamp(registerInput.getServiceHealth().getTimestamp())
+            .numberOfConnections(registerInput.getServiceHealth().getNumberOfConnections())
+            .build();
+
+    return this.serviceInstanceRepository.save(instance).getInstanceId();
   }
 
   @Transactional
@@ -41,13 +55,13 @@ public class ServiceManagement implements ServiceHealthService {
   public void updateHealth(HealthUpdateInput healthUpdateInput) {
     var service =
         this.serviceModelRepository
-            .findById(healthUpdateInput.getServiceId())
+            .findById(healthUpdateInput.getInstanceId())
             .orElseThrow(
                 () ->
                     new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         String.format(
-                            "Service with id '%s' not found", healthUpdateInput.getServiceId())));
+                            "Service with id '%s' not found", healthUpdateInput.getInstanceId())));
 
     var newInstance =
         this.serviceInstanceRepository.save(
