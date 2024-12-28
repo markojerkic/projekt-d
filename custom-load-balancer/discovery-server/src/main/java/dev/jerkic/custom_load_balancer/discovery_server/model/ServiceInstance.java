@@ -10,7 +10,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
 
-@RedisHash("service_instance")
+@RedisHash(value = "service_instance", timeToLive = 5 * 60)
 @Builder
 @Getter
 @Setter
@@ -20,7 +20,7 @@ public class ServiceInstance {
   @Id private String entryId;
   @Indexed private String instanceId;
   @Indexed private String serviceId;
-  private boolean isHealthy;
+  @Indexed private boolean isHealthy;
   private Long numberOfConnections;
   private Instant timestamp;
 }

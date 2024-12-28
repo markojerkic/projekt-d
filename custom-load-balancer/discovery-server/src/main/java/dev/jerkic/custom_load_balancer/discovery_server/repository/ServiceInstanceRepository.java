@@ -18,5 +18,5 @@ public interface ServiceInstanceRepository
    * @param serviceId service id
    * @return page of healthy instances
    */
-  Page<ServiceInstance> findByServiceId(String serviceId, Pageable pageable);
+  Page<ServiceInstance> findByServiceIdAndIsHealthyTrue(String serviceId, Pageable pageable);
 }

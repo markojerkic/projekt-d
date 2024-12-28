@@ -32,7 +32,7 @@ public class ServiceController {
     return "service-detail";
   }
 
-  @HxRequest
+  @HxRequest(boosted = false)
   @GetMapping("/service/{serviceId}")
   public String hxInstances(Model model, @PathVariable String serviceId) {
     var serviceInstances = this.serviceManagement.getInstacesForService(serviceId);

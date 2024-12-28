@@ -4,9 +4,11 @@ import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceInstance;
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceModel;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceInstanceRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceRepository;
+import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceRepository.ServiceModelProjection;
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,12 +81,12 @@ public class ServiceManagement implements ServiceHealthService {
         "Health updated for service '{}' with health {}", service.getServiceName(), newInstance);
   }
 
-  public Iterable<ServiceModel> getServices() {
-    return this.serviceModelRepository.findAll();
+  public List<ServiceModelProjection> getServices() {
+    return this.serviceModelRepository.findAllProjectedBy();
   }
 
   public Iterable<ServiceInstance> getInstacesForService(String serviceId) {
-    return this.serviceInstanceRepository.findByServiceId(
+    return this.serviceInstanceRepository.findByServiceIdAndIsHealthyTrue(
         serviceId,
         PageRequest.of(
             0, 5, Sort.by(Sort.Order.desc("timestamp"), Sort.Order.asc("numberOfConnections"))));
