@@ -6,6 +6,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.Date;
 import lombok.AllArgsConstructor;
@@ -41,6 +42,9 @@ public class ServiceInstance {
 
   @ManyToOne(fetch = FetchType.LAZY)
   private ServiceModel serviceModel;
+
+  @OneToOne(mappedBy = "serviceInstance")
+  private BestInstance bestInstance;
 
   public static ResolvedInstance toResolvedInstance(ServiceInstance serviceInstance) {
     return ResolvedInstance.builder()
