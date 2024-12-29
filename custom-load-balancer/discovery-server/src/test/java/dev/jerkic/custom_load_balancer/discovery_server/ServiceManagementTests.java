@@ -33,8 +33,8 @@ public class ServiceManagementTests {
   @AfterEach
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public void tearDown() {
-    this.serviceInstanceRepository.deleteAll();
-    this.serviceModelRepository.deleteAll();
+    this.serviceInstanceRepository.deleteAllInBatch();
+    this.serviceModelRepository.deleteAllInBatch();
   }
 
   @Test
