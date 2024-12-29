@@ -28,8 +28,8 @@ import lombok.ToString;
           name = "service_instance_timestamp_desc_health_index",
           columnList = "instanceRecordedAt DESC, isHealthy")
     })
-@ToString(exclude = "serviceModel")
-@EqualsAndHashCode(exclude = "serviceModel")
+@ToString(exclude = {"serviceModel", "bestInstance"})
+@EqualsAndHashCode(exclude = {"serviceModel", "bestInstance"})
 public class ServiceInstance {
   @Id private String entryId;
 

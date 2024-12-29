@@ -31,7 +31,7 @@ public class ServiceManagementTests {
   @Autowired private ServiceManagement serviceManagement;
 
   @AfterEach
-  @Transactional
+  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public void tearDown() {
     this.serviceInstanceRepository.deleteAll();
     this.serviceModelRepository.deleteAll();
