@@ -56,7 +56,7 @@ public class ServiceManagement implements ServiceHealthService {
             .isHealthy(registerInput.getServiceHealth().isHealthy())
             .instanceRecordedAt(Date.from(registerInput.getServiceHealth().getTimestamp()))
             .address(registerInput.getServiceHealth().getAddress())
-            .numberOfConnections(registerInput.getServiceHealth().getNumberOfConnections())
+            .activeHttpRequests(registerInput.getServiceHealth().getNumberOfConnections())
             .build();
 
     return this.serviceInstanceRepository.save(instance).getInstanceId().toString();
@@ -87,7 +87,7 @@ public class ServiceManagement implements ServiceHealthService {
                 .instanceId(healthUpdateInput.getInstanceId())
                 .address(healthUpdateInput.getHealth().getAddress())
                 .instanceRecordedAt(Date.from(healthUpdateInput.getHealth().getTimestamp()))
-                .numberOfConnections(healthUpdateInput.getHealth().getNumberOfConnections())
+                .activeHttpRequests(healthUpdateInput.getHealth().getNumberOfConnections())
                 .isHealthy(healthUpdateInput.getHealth().isHealthy())
                 .build());
     service.getInstances().add(newInstance);
@@ -114,13 +114,7 @@ public class ServiceManagement implements ServiceHealthService {
         select si.*
         from service_instance si
         join (
-            select s.entry_id, max(s.instance_recorded_at) as latest_timestamp
-            from service_instance s
-            where s.service_model_id = :serviceId
-              and s.is_healthy is true
-              and strftime('%s', 'now') * 1000 - s.instance_recorded_at
-              <= 3*60*1000
-            group by s.instance_id
+          select * from best_instance where best_instance.service_id = :service_id
         ) latest
         on si.entry_id = latest.entry_id
         order by si.instance_recorded_at desc, si.number_of_connections asc
@@ -131,7 +125,7 @@ public class ServiceManagement implements ServiceHealthService {
               .instanceId(rs.getString("instance_id"))
               .isHealthy(rs.getBoolean("is_healthy"))
               .address(rs.getString("address"))
-              .numberOfConnections(rs.getLong("number_of_connections"))
+              .activeHttpRequests(rs.getLong("number_of_connections"))
               .instanceRecordedAt(rs.getDate("instance_recorded_at"))
               .build();
         },
