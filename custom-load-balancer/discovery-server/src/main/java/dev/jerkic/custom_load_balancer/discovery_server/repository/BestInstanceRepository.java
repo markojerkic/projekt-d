@@ -2,10 +2,13 @@ package dev.jerkic.custom_load_balancer.discovery_server.repository;
 
 import dev.jerkic.custom_load_balancer.discovery_server.model.BestInstance;
 import java.util.List;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface BestInstanceRepository
-    extends CrudRepository<BestInstance, String>, PagingAndSortingRepository<BestInstance, String> {
+    extends JpaRepository<BestInstance, String>, JpaSpecificationExecutor<BestInstance> {
   List<BestInstance> findByServiceId(String serviceId);
+
+  Optional<BestInstance> findFirstByServiceInstance_serviceModel_serviceName(String serviceName);
 }
