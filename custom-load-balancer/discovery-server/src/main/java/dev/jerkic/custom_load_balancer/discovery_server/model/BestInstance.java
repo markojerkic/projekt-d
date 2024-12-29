@@ -32,7 +32,7 @@ import org.hibernate.annotations.Synchronize;
 @NoArgsConstructor
 public class BestInstance {
   @Id private String entryId;
-  private Long serviceId;
+  private String serviceId;
   private Date latestTimestamp;
 
   @OneToOne
