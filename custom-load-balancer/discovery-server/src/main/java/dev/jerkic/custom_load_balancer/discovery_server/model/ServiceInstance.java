@@ -1,5 +1,6 @@
 package dev.jerkic.custom_load_balancer.discovery_server.model;
 
+import dev.jerkic.custom_load_balancer.shared.model.dto.ResolvedInstance;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -35,9 +36,18 @@ public class ServiceInstance {
 
   private boolean isHealthy;
   private String address;
-  private Long numberOfConnections;
+  private Long activeHttpRequests;
   private Date instanceRecordedAt;
 
   @ManyToOne(fetch = FetchType.LAZY)
   private ServiceModel serviceModel;
+
+  public static ResolvedInstance toResolvedInstance(ServiceInstance serviceInstance) {
+    return ResolvedInstance.builder()
+        .instanceId(serviceInstance.getInstanceId())
+        .address(serviceInstance.getAddress())
+        .activeRequests(serviceInstance.getActiveHttpRequests())
+        .isHealthy(serviceInstance.isHealthy())
+        .build();
+  }
 }
