@@ -10,5 +10,5 @@ import lombok.Data;
 public class HealthUpdateInput {
   @NotNull @NotEmpty private String instanceId;
   @NotNull @NotEmpty private String serviceName;
-  @NotNull @NotEmpty private ServiceHealthInput health;
+  @NotNull private ServiceHealthInput health;
 }

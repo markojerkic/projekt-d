@@ -24,20 +24,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.server.ResponseStatusException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Transactional
 public class ServiceManagementTests {
   @Autowired private ServiceModelRepository serviceModelRepository;
   @Autowired private ServiceInstanceRepository serviceInstanceRepository;
   @Autowired private ServiceManagement serviceManagement;
 
   @AfterEach
-  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public void tearDown() {
     this.serviceInstanceRepository.deleteAllInBatch();
     this.serviceModelRepository.deleteAllInBatch();
   }
 
   @Test
+  @Transactional
   public void testRegisterService() {
     var serviceName = "test-service";
     var registerInput =
@@ -60,6 +59,7 @@ public class ServiceManagementTests {
   }
 
   @Test
+  @Transactional
   public void testRegisterExistingService() {
     var serviceName = "test-service";
     var registerInput =
@@ -79,6 +79,7 @@ public class ServiceManagementTests {
   }
 
   @Test
+  @Transactional
   public void testUpdateHealthForNonExistingService() {
     var healthUpdate = this.getServiceHealth("8090", true, "test-service");
     assertThrows(
@@ -97,6 +98,7 @@ public class ServiceManagementTests {
   }
 
   @Test
+  @Transactional
   public void testUpdateHeath() {
     // Register
     var serviceName = "test-service";
@@ -141,6 +143,7 @@ public class ServiceManagementTests {
   }
 
   @Test
+  @Transactional
   public void testMultipleInstances() {
     // Register
     var serviceName = "test-service";

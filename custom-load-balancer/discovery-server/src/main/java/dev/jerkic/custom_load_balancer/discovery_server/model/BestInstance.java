@@ -37,7 +37,7 @@ public class BestInstance {
   @Column(name = "entry_id")
   private String entryId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "entry_id", insertable = false, updatable = false)
   private ServiceInstance serviceInstance;
 

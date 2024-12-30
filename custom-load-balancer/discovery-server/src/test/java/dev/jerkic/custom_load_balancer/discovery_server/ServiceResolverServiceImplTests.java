@@ -10,6 +10,7 @@ import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceHealthInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceInfo;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
 import org.junit.jupiter.api.AfterEach;
@@ -18,21 +19,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Transactional
 public class ServiceResolverServiceImplTests {
   @Autowired private ServiceModelRepository serviceModelRepository;
   @Autowired private ServiceInstanceRepository serviceInstanceRepository;
   @Autowired private ServiceManagement serviceManagement;
   @Autowired private ServiceResolverServiceImpl serviceResolverService;
 
+  @Autowired private EntityManager entityManager;
+
   @AfterEach
-  @Transactional(Transactional.TxType.REQUIRES_NEW)
   public void tearDown() {
     this.serviceInstanceRepository.deleteAllInBatch();
     this.serviceModelRepository.deleteAllInBatch();
   }
 
   @Test
+  @Transactional
   public void testResolveServiceToInstances() {
     // Register
     var serviceName = "test-service";
@@ -52,6 +54,10 @@ public class ServiceResolverServiceImplTests {
             .serviceName(healthUpdate.getServiceName())
             .health(healthUpdate)
             .build());
+
+    // Commit transaction
+    this.entityManager.flush();
+    this.entityManager.clear();
 
     var resolvedBestInstances = this.serviceResolverService.resolveService(serviceName);
     assertEquals(1, resolvedBestInstances.size());
