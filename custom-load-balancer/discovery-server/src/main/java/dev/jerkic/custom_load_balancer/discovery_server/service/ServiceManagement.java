@@ -32,9 +32,6 @@ public class ServiceManagement implements ServiceHealthService {
   @Transactional
   public String registerService(RegisterInput registerInput) {
 
-    var remoteHost = this.request.getRemoteHost();
-    var protocol = this.request.getProtocol();
-
     var serviceInfo = registerInput.getServiceInfo();
     var registeredService =
         this.serviceModelRepository.findByServiceName(serviceInfo.getServiceName());
@@ -60,17 +57,11 @@ public class ServiceManagement implements ServiceHealthService {
             .serviceModel(serviceModel)
             .isHealthy(registerInput.getServiceHealth().isHealthy())
             .instanceRecordedAt(Date.from(registerInput.getServiceHealth().getTimestamp()))
-            .address(
-                this.buildInstanceAddress(
-                    registerInput.getServiceHealth().getServerPort(), remoteHost, protocol))
+            .address(this.buildInstanceAddress(registerInput.getServiceHealth().getServerPort()))
             .activeHttpRequests(registerInput.getServiceHealth().getNumberOfConnections())
             .build();
 
     return this.serviceInstanceRepository.save(instance).getInstanceId().toString();
-  }
-
-  private String buildInstanceAddress(String port, String remoteHost, String protocol) {
-    return String.format("%s://%s:%s", protocol, remoteHost, port);
   }
 
   @Transactional
@@ -96,7 +87,7 @@ public class ServiceManagement implements ServiceHealthService {
                 // .serviceModel(ServiceModel.builder().id(service.getId()).build())
                 .serviceModel(service)
                 .instanceId(healthUpdateInput.getInstanceId())
-                .address(healthUpdateInput.getHealth().getServerPort())
+                .address(this.buildInstanceAddress(healthUpdateInput.getHealth().getServerPort()))
                 .instanceRecordedAt(Date.from(healthUpdateInput.getHealth().getTimestamp()))
                 .activeHttpRequests(healthUpdateInput.getHealth().getNumberOfConnections())
                 .isHealthy(healthUpdateInput.getHealth().isHealthy())
@@ -131,5 +122,11 @@ public class ServiceManagement implements ServiceHealthService {
         delete from service_instance where
         strftime('%s', 'now') * 1000 - service_instance.instance_recorded_at >= 3*60*1000;
         """);
+  }
+
+  private String buildInstanceAddress(String port) {
+    var remoteHost = this.request.getRemoteHost();
+    var protocol = this.request.getProtocol();
+    return String.format("%s://%s:%s", protocol, remoteHost, port);
   }
 }

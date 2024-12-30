@@ -2,7 +2,6 @@ package dev.jerkic.custom_load_balancer.discovery_server.service;
 
 import dev.jerkic.custom_load_balancer.discovery_server.model.BestInstance;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.BestInstanceRepository;
-import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceInstanceRepository;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ResolvedInstance;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceResolverService;
 import jakarta.transaction.Transactional;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 @Transactional
 public class ServiceResolverServiceImpl implements ServiceResolverService {
   private final BestInstanceRepository bestInstanceRepository;
-  private final ServiceInstanceRepository serviceInstanceRepository;
 
   @Override
   public List<ResolvedInstance> resolveService(String serviceName) {

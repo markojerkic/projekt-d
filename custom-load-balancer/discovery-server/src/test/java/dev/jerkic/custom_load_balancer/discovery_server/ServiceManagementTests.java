@@ -69,7 +69,7 @@ public class ServiceManagementTests {
 
     assertNotNull(instance);
     assertEquals(serviceName, instance.getServiceModel().getServiceName());
-    assertEquals("http://localhost:8080", instance.getAddress());
+    assertEquals("http://localhost:8090", instance.getAddress());
 
     assertEquals(1, this.serviceModelRepository.count());
     assertEquals(1, this.serviceInstanceRepository.count());
