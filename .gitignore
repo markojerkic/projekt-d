@@ -1,3 +1,4 @@
 .idea/
 tailwind.config.js
 *.db
+bin/
