@@ -52,7 +52,7 @@ public class ProxyRestTemplateTests {
   public void testRequest() {
     var randomResponse = String.valueOf(Math.random() * 1000);
     this.mockServer
-        .expect(MockRestRequestMatchers.requestTo("http://test-service/test/something/2"))
+        .expect(MockRestRequestMatchers.requestTo("http://192.0.0.1:8090/test/something/2"))
         .andRespond(MockRestResponseCreators.withSuccess(randomResponse, MediaType.TEXT_PLAIN));
 
     // Mock HttpServletRequest behavior
@@ -72,8 +72,7 @@ public class ProxyRestTemplateTests {
     this.serviceManagement.registerService(registerInput);
 
     // Verify the request
-    var response =
-        this.proxyRestTemplate.getForEntity("http://test-service/test/something/2", String.class);
+    var response = this.proxyRestTemplate.getForEntity("/test/something/2", String.class);
 
     assertEquals(200, response.getStatusCode().value());
     assertEquals(randomResponse, response.getBody());
