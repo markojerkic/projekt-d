@@ -3,6 +3,7 @@ package dev.jerkic.custom_load_balancer.shared.model.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import java.sql.Date;
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,4 +18,5 @@ public class ResolvedInstance {
   private Long activeRequests;
 
   @NotNull private Boolean isHealthy;
+  @NotNull private Date recordedAt;
 }

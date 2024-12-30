@@ -9,8 +9,10 @@ import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceInstance;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceInstanceRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.service.ServiceManagement;
+import dev.jerkic.custom_load_balancer.discovery_server.service.ServiceResolverServiceImpl;
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
+import dev.jerkic.custom_load_balancer.shared.model.dto.ResolvedInstance;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceHealthInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceInfo;
 import jakarta.transaction.Transactional;
@@ -28,6 +30,7 @@ public class ServiceManagementTests {
   @Autowired private ServiceModelRepository serviceModelRepository;
   @Autowired private ServiceInstanceRepository serviceInstanceRepository;
   @Autowired private ServiceManagement serviceManagement;
+  @Autowired private ServiceResolverServiceImpl serviceResolverServiceImpl;
 
   @Test
   public void testRegisterService() {
@@ -121,15 +124,15 @@ public class ServiceManagementTests {
     assertNotNull(serviceModel);
 
     var serviceInstances =
-        this.serviceManagement.getInstacesForService(serviceModel.getId().toString());
+        this.serviceResolverServiceImpl.resolveServiceForServiceId(serviceModel.getId().toString());
 
     assertEquals(1, serviceInstances.size());
     assertEquals(
         Date.from(healthUpdate.getTimestamp()),
-        ((ServiceInstance) serviceInstances.toArray()[0]).getInstanceRecordedAt());
+        ((ResolvedInstance) serviceInstances.toArray()[0]).getRecordedAt());
     assertNotEquals(
         Date.from(initialHealth.getTimestamp()),
-        ((ServiceInstance) serviceInstances.toArray()[0]).getInstanceRecordedAt());
+        ((ResolvedInstance) serviceInstances.toArray()[0]).getRecordedAt());
   }
 
   @Test
@@ -177,7 +180,7 @@ public class ServiceManagementTests {
             .get();
 
     var serviceInstances =
-        this.serviceManagement.getInstacesForService(serviceModel.getId().toString());
+        this.serviceResolverServiceImpl.resolveServiceForServiceId(serviceModel.getId().toString());
 
     assertEquals(2, serviceInstances.size());
     var instance1 =
@@ -191,8 +194,8 @@ public class ServiceManagementTests {
             .findFirst()
             .get();
 
-    assertEquals(Date.from(healthUpdate2.getTimestamp()), instance1.getInstanceRecordedAt());
-    assertEquals(Date.from(healthUpdate3.getTimestamp()), instance2.getInstanceRecordedAt());
+    assertEquals(Date.from(healthUpdate2.getTimestamp()), instance1.getRecordedAt());
+    assertEquals(Date.from(healthUpdate3.getTimestamp()), instance2.getRecordedAt());
   }
 
   private ServiceHealthInput getServiceHealth(String port, boolean isHealthy, String serviceName) {
