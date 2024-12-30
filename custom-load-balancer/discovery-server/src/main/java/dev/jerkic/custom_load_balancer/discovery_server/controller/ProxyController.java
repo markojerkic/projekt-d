@@ -1,7 +1,6 @@
 package dev.jerkic.custom_load_balancer.discovery_server.controller;
 
 import dev.jerkic.custom_load_balancer.discovery_server.config.ProxyRestTemplate;
-import dev.jerkic.custom_load_balancer.discovery_server.service.LoadBalancingService;
 import dev.jerkic.custom_load_balancer.discovery_server.util.RequestEntityConverter;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class ProxyController {
   private final ProxyRestTemplate restTemplate;
-  private final LoadBalancingService loadBalancingService;
 
   @RequestMapping("/**")
   public ResponseEntity<?> proxy(HttpServletRequest request) throws IOException {
@@ -26,6 +24,6 @@ public class ProxyController {
     log.info("Request: {}", request.getRequestURI());
 
     var requestEntity = RequestEntityConverter.fromHttpServletRequest(request);
-    return this.restTemplate.exchange(requestEntity, Object.class);
+    return this.restTemplate.exchange(requestEntity, String.class);
   }
 }

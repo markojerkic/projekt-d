@@ -3,7 +3,11 @@ package dev.jerkic.custom_load_balancer.example_server_1;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = "dev.jerkic.custom_load_balancer.client")
+@SpringBootApplication(
+    scanBasePackages = {
+      "dev.jerkic.custom_load_balancer.example_server_1",
+      "dev.jerkic.custom_load_balancer.client"
+    })
 public class ExampleServer1Application {
 
   public static void main(String[] args) {
