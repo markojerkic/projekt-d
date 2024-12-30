@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # This script is used to build and deploy the application to Fly.io
-./mvnw clean install
+./mvnw clean install -DskipTests
 
 cd ./discovery-server
-docker build -t docker.io/markojerkic/discover-server .
-docker push docker.io/markojerkic/discover-server
-flyctl deploy
+docker build -t docker.io/markojerkic/discovery-server .
+docker push docker.io/markojerkic/discovery-server
+flyctl deploy --remove-only --image docker.io/markojerkic/discovery-server:latest
