@@ -1,5 +1,6 @@
 package dev.jerkic.custom_load_balancer.discovery_server.controller;
 
+import dev.jerkic.custom_load_balancer.discovery_server.config.ProxyRestTemplate;
 import dev.jerkic.custom_load_balancer.discovery_server.service.LoadBalancingService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Slf4j
 public class ProxyController {
+  private final ProxyRestTemplate restTemplate;
   private final LoadBalancingService loadBalancingService;
 
   @RequestMapping("/**")
@@ -21,6 +23,6 @@ public class ProxyController {
     log.info("Requested path: {}", requestedPath);
     log.info("Request: {}", request.getRequestURI());
 
-    return this.loadBalancingService.proxyRequest(request);
+    return ResponseEntity.ok("Nema još ništa");
   }
 }

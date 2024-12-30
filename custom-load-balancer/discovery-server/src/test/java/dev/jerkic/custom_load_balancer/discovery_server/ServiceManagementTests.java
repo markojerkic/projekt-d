@@ -16,14 +16,19 @@ import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ResolvedInstance;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceHealthInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceInfo;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.server.ResponseStatusException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -33,6 +38,20 @@ public class ServiceManagementTests {
   @Autowired private ServiceInstanceRepository serviceInstanceRepository;
   @Autowired private ServiceManagement serviceManagement;
   @Autowired private ServiceResolverServiceImpl serviceResolverServiceImpl;
+
+  @TestConfiguration
+  static class TestConfig {
+    @Bean
+    @Primary
+    public HttpServletRequest mockRequest() {
+      var request = Mockito.mock(HttpServletRequest.class);
+
+      Mockito.when(request.getRemoteHost()).thenReturn("localhost");
+      Mockito.when(request.getProtocol()).thenReturn("http");
+
+      return request;
+    }
+  }
 
   @Test
   public void testRegisterService() {
@@ -50,7 +69,7 @@ public class ServiceManagementTests {
 
     assertNotNull(instance);
     assertEquals(serviceName, instance.getServiceModel().getServiceName());
-    assertEquals("8090", instance.getAddress());
+    assertEquals("http://localhost:8080", instance.getAddress());
 
     assertEquals(1, this.serviceModelRepository.count());
     assertEquals(1, this.serviceInstanceRepository.count());
