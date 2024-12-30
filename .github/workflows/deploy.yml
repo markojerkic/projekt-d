@@ -1,5 +1,4 @@
 name: Build and Deploy Services
-
 on:
   push:
     branches: [ "master" ]
@@ -9,11 +8,9 @@ env:
   REGISTRY: docker.io
   DISCOVERY_IMAGE: markojerkic/discovery-server
   EXAMPLE_IMAGE: markojerkic/example-server-1
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
 
@@ -36,17 +33,29 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+    - name: Build Discovery Server JAR
+      run: |
+        cd custom-load-balancer/discovery-server
+        mvn clean package
+
     - name: Build and push Discovery Server
       uses: docker/build-push-action@v5
       with:
         context: ./custom-load-balancer/discovery-server
+        file: ./custom-load-balancer/discovery-server/Dockerfile
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ env.DISCOVERY_IMAGE }}:latest
+
+    - name: Build Example Server JAR
+      run: |
+        cd custom-load-balancer/examples/example-server-1
+        mvn clean package
 
     - name: Build and push Example Server
       uses: docker/build-push-action@v5
       with:
         context: ./custom-load-balancer/examples/example-server-1
+        file: ./custom-load-balancer/examples/example-server-1/Dockerfile
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ env.EXAMPLE_IMAGE }}:latest
 
@@ -61,11 +70,3 @@ jobs:
         flyctl deploy --remote-only --image ${{ env.REGISTRY }}/${{ env.DISCOVERY_IMAGE }}:latest
       env:
         FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-    # - name: Deploy Example Server to fly.io
-    #   if: github.event_name != 'pull_request'
-    #   run: |
-    #     cd custom-load-balancer/examples/example-server-1
-    #     flyctl deploy --remote-only --image ${{ env.REGISTRY }}/${{ env.EXAMPLE_IMAGE }}:latest
-    #   env:
-    #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
