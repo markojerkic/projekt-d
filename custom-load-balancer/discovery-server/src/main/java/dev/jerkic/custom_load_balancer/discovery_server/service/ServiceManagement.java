@@ -40,6 +40,7 @@ public class ServiceManagement implements ServiceHealthService {
           ServiceModel.builder()
               .id(UUID.randomUUID().toString())
               .serviceName(serviceInfo.getServiceName())
+              .baseHref(serviceInfo.getBaseHref())
               .build();
       serviceModel = this.serviceModelRepository.save(service);
     } else {

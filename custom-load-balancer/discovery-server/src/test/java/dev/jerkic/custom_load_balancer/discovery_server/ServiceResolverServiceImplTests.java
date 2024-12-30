@@ -200,6 +200,6 @@ public class ServiceResolverServiceImplTests {
   }
 
   private ServiceInfo getServiceInfo(String serviceName) {
-    return ServiceInfo.builder().serviceName(serviceName).serviceHealthCheckUrl("/health").build();
+    return ServiceInfo.builder().serviceName(serviceName).baseHref("/" + serviceName).build();
   }
 }

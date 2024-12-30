@@ -32,6 +32,9 @@ public class DiscoveryServiceConfiguration {
   @Value("${server.port}")
   private int serverPort;
 
+  @Value("${server.servlet.context-path:/}")
+  private String baseHref;
+
   private final ClientHealthService clientHealthService;
   private final ClientProperties clientProperties;
 
@@ -93,8 +96,15 @@ public class DiscoveryServiceConfiguration {
   private final ServiceInfo getServiceInfo() {
     return ServiceInfo.builder()
         .serviceName(this.clientProperties.getServiceName())
-        .serviceHealthCheckUrl("/health")
+        .baseHref(this.getBaseHref())
         .build();
+  }
+
+  private String getBaseHref() {
+    if (this.baseHref.startsWith("/")) {
+      return this.baseHref;
+    }
+    return "/" + this.baseHref;
   }
 
   /**

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceInstance;
+import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceModel;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceInstanceRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.service.ServiceManagement;
@@ -18,6 +19,7 @@ import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceInfo;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -198,6 +200,19 @@ public class ServiceManagementTests {
     assertEquals(Date.from(healthUpdate3.getTimestamp()), instance2.getRecordedAt());
   }
 
+  @Test
+  public void testInsertTwoServicesWithSameName() {
+    var serviceName = "test-service";
+    assertThrows(
+        Exception.class,
+        () -> {
+          this.serviceModelRepository.saveAll(
+              List.of(
+                  ServiceModel.builder().serviceName(serviceName).build(),
+                  ServiceModel.builder().serviceName(serviceName).build()));
+        });
+  }
+
   private ServiceHealthInput getServiceHealth(String port, boolean isHealthy, String serviceName) {
     return ServiceHealthInput.builder()
         .address(port)
@@ -209,6 +224,6 @@ public class ServiceManagementTests {
   }
 
   private ServiceInfo getServiceInfo(String serviceName) {
-    return ServiceInfo.builder().serviceName(serviceName).serviceHealthCheckUrl("/health").build();
+    return ServiceInfo.builder().serviceName(serviceName).baseHref("/" + serviceName).build();
   }
 }
