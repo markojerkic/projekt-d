@@ -1,0 +1,72 @@
+name: Build and Deploy Services
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  REGISTRY: docker.io
+  DISCOVERY_IMAGE: markojerkic/discovery-server
+  EXAMPLE_IMAGE: markojerkic/example-server-1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 23
+      uses: actions/setup-java@v4
+      with:
+        java-version: '23'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build with Maven
+      run: |
+        cd custom-load-balancer
+        mvn clean install
+
+    - name: Login to Docker Hub
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push Discovery Server
+      uses: docker/build-push-action@v5
+      with:
+        context: ./custom-load-balancer/discovery-server
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ env.DISCOVERY_IMAGE }}:latest
+
+    - name: Build and push Example Server
+      uses: docker/build-push-action@v5
+      with:
+        context: ./custom-load-balancer/examples/example-server-1
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ env.EXAMPLE_IMAGE }}:latest
+
+    - name: Install flyctl
+      if: github.event_name != 'pull_request'
+      uses: superfly/flyctl-actions/setup-flyctl@master
+
+    - name: Deploy Discovery Server to fly.io
+      if: github.event_name != 'pull_request'
+      run: |
+        cd custom-load-balancer/discovery-server
+        flyctl deploy --image ${{ env.REGISTRY }}/${{ env.DISCOVERY_IMAGE }}:latest
+      env:
+        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+    - name: Deploy Example Server to fly.io
+      if: github.event_name != 'pull_request'
+      run: |
+        cd custom-load-balancer/examples/example-server-1
+        flyctl deploy --image ${{ env.REGISTRY }}/${{ env.EXAMPLE_IMAGE }}:latest
+      env:
+        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
