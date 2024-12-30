@@ -15,8 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
@@ -27,8 +29,19 @@ public class ProxyRestTemplateTests {
   @Autowired private ServiceManagement serviceManagement;
   @Autowired private ProxyRestTemplate proxyRestTemplate;
 
-  @MockitoBean private HttpServletRequest httpServletRequest;
+  @Autowired private HttpServletRequest httpServletRequest;
   private MockRestServiceServer mockServer;
+
+  @TestConfiguration
+  static class TestConfig {
+    @Bean
+    @Primary
+    public HttpServletRequest mockRequest() {
+      var request = Mockito.mock(HttpServletRequest.class);
+
+      return request;
+    }
+  }
 
   @BeforeEach
   void setUp() {
@@ -42,11 +55,11 @@ public class ProxyRestTemplateTests {
         .expect(MockRestRequestMatchers.requestTo("http://test-service/test/something/2"))
         .andRespond(MockRestResponseCreators.withSuccess(randomResponse, MediaType.TEXT_PLAIN));
 
-    var remote1 = "192.0.0.1";
-    var protocol1 = "http";
-    Mockito.when(httpServletRequest.getRemoteHost()).thenReturn(remote1);
-    Mockito.when(httpServletRequest.getProtocol()).thenReturn(protocol1);
+    // Mock HttpServletRequest behavior
+    Mockito.when(httpServletRequest.getRemoteHost()).thenReturn("192.0.0.1");
+    Mockito.when(httpServletRequest.getProtocol()).thenReturn("http");
 
+    // Register a service
     var serviceName = "test-service";
     var baseHref = "/test";
     var registerInput =
@@ -58,6 +71,7 @@ public class ProxyRestTemplateTests {
 
     this.serviceManagement.registerService(registerInput);
 
+    // Verify the request
     var response =
         this.proxyRestTemplate.getForEntity("http://test-service/test/something/2", String.class);
 
