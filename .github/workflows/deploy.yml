@@ -33,19 +33,31 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build Discovery Server Image
+    - name: Build Discovery Server JAR
       run: |
         cd custom-load-balancer/discovery-server
-        mvn spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.DISCOVERY_IMAGE }}:latest -DskipTests
-        docker push ${{ env.REGISTRY }}/${{ env.DISCOVERY_IMAGE }}:latest
-      if: github.event_name != 'pull_request'
+        mvn clean package -DskipTests
 
-    - name: Build Example Server Image
+    - name: Build and push Discovery Server
+      uses: docker/build-push-action@v5
+      with:
+        context: ./custom-load-balancer/discovery-server
+        file: ./custom-load-balancer/discovery-server/Dockerfile
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ env.DISCOVERY_IMAGE }}:latest
+
+    - name: Build Example Server JAR
       run: |
         cd custom-load-balancer/examples/example-server-1
-        mvn spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.EXAMPLE_IMAGE }}:latest -DskipTests
-        docker push ${{ env.REGISTRY }}/${{ env.EXAMPLE_IMAGE }}:latest
-      if: github.event_name != 'pull_request'
+        mvn clean package -DskipTests
+
+    - name: Build and push Example Server
+      uses: docker/build-push-action@v5
+      with:
+        context: ./custom-load-balancer/examples/example-server-1
+        file: ./custom-load-balancer/examples/example-server-1/Dockerfile
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ env.EXAMPLE_IMAGE }}:latest
 
     - name: Install flyctl
       if: github.event_name != 'pull_request'
