@@ -33,15 +33,19 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build and push Discovery Server
+    - name: Build Discovery Server Image
       run: |
         cd custom-load-balancer/discovery-server
-        mvn clean compile jib:build -Djib.to.image=${{ env.REGISTRY }}/${{ env.DISCOVERY_IMAGE }}:latest -Djib.to.auth.username=${{ secrets.DOCKERHUB_USERNAME }} -Djib.to.auth.password=${{ secrets.DOCKERHUB_TOKEN }}
+        mvn spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.DISCOVERY_IMAGE }}:latest
+        docker push ${{ env.REGISTRY }}/${{ env.DISCOVERY_IMAGE }}:latest
+      if: github.event_name != 'pull_request'
 
-    # - name: Build and push Example Server
-    #   run: |
-    #     cd custom-load-balancer/examples/example-server-1
-    #     mvn clean compile jib:build -Djib.to.image=${{ env.REGISTRY }}/${{ env.EXAMPLE_IMAGE }}:latest -Djib.to.auth.username=${{ secrets.DOCKERHUB_USERNAME }} -Djib.to.auth.password=${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Build Example Server Image
+      run: |
+        cd custom-load-balancer/examples/example-server-1
+        mvn spring-boot:build-image -Dspring-boot.build-image.imageName=${{ env.REGISTRY }}/${{ env.EXAMPLE_IMAGE }}:latest
+        docker push ${{ env.REGISTRY }}/${{ env.EXAMPLE_IMAGE }}:latest
+      if: github.event_name != 'pull_request'
 
     - name: Install flyctl
       if: github.event_name != 'pull_request'

@@ -84,8 +84,15 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <image>
+                        <name>docker.io/markojerkic/example-server-1</name>
+                        <env>
+                            <BP_JVM_VERSION>23</BP_JVM_VERSION>
+                        </env>
+                    </image>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 

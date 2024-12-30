@@ -129,23 +129,24 @@
                 </configuration>
             </plugin>
 
-            <!--<plugin>-->
-            <!--    <groupId>com.google.cloud.tools</groupId>-->
-            <!--    <artifactId>jib-maven-plugin</artifactId>-->
-            <!--    <version>3.4.4</version>-->
-            <!--    <configuration>-->
-            <!--        <from>-->
-            <!--            <image>openjdk:23-slim</image>-->
-            <!--        </from>-->
-            <!--        <to>-->
-            <!--            <image>docker.io/markojerkic/discovery-server</image>-->
-            <!--            <tags>-->
-            <!--                <tag>latest</tag>-->
-            <!--            </tags>-->
-            <!--        </to>-->
-            <!--    </configuration>-->
-            <!--</plugin>-->
-
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                    <image>
+                        <name>docker.io/markojerkic/discovery-server</name>
+                        <env>
+                            <BP_JVM_VERSION>23</BP_JVM_VERSION>
+                        </env>
+                    </image>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
