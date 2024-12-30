@@ -124,8 +124,11 @@ public class ServiceManagement implements ServiceHealthService {
   }
 
   private String buildInstanceAddress(String port) {
-    var remoteHost = this.request.getRemoteHost();
-    var protocol = this.request.getScheme();
+    String remoteHost = this.request.getHeader("X-Forwarded-For");
+    if (remoteHost == null) {
+      remoteHost = this.request.getRemoteHost();
+    }
+    String protocol = this.request.getScheme();
     return String.format("%s://%s:%s", protocol, remoteHost, port);
   }
 }
