@@ -120,46 +120,36 @@ public class ServiceResolverServiceImplTests {
   public void testMultipleInstancesWithDifferentActiveConnections() {
     // Register true target
     var serviceName = "test-service";
-    var initialHealth = this.getServiceHealth("8090", true, serviceName);
-    var registerInput =
+
+    var instanceInputTime = Instant.now();
+    var registerInput1 =
         RegisterInput.builder()
             .serviceInfo(this.getServiceInfo(serviceName))
-            .serviceHealth(initialHealth)
+            .serviceHealth(this.getServiceHealth("8070", true, serviceName))
             .build();
+    registerInput1.getServiceHealth().setNumberOfConnections(1l);
+    registerInput1.getServiceHealth().setTimestamp(instanceInputTime);
+    var instanceId1 = this.serviceManagement.registerService(registerInput1);
 
-    var instanceTimestamp = Instant.now();
-
-    var instanceId1 = this.serviceManagement.registerService(registerInput);
-    var healthUpdate1 = this.getServiceHealth("8070", true, serviceName);
-    healthUpdate1.setTimestamp(instanceTimestamp);
-    this.serviceManagement.updateHealth(
-        HealthUpdateInput.builder()
-            .instanceId(instanceId1)
-            .serviceName(healthUpdate1.getServiceName())
-            .health(healthUpdate1)
-            .build());
-
-    var instanceId2 = this.serviceManagement.registerService(registerInput);
-    var healthUpdate2 = this.getServiceHealth("8030", true, serviceName);
-    healthUpdate2.setTimestamp(instanceTimestamp);
-    healthUpdate2.setNumberOfConnections(3l);
-    this.serviceManagement.updateHealth(
-        HealthUpdateInput.builder()
-            .instanceId(instanceId2)
-            .serviceName(healthUpdate2.getServiceName())
-            .health(healthUpdate2)
-            .build());
+    var registerInput2 =
+        RegisterInput.builder()
+            .serviceInfo(this.getServiceInfo(serviceName))
+            .serviceHealth(this.getServiceHealth("8070", true, serviceName))
+            .build();
+    registerInput2.getServiceHealth().setNumberOfConnections(2l);
+    registerInput2.getServiceHealth().setTimestamp(instanceInputTime);
+    var instanceId2 = this.serviceManagement.registerService(registerInput2);
 
     var resolvedBestInstances = this.serviceResolverService.resolveService(serviceName);
     assertEquals(2, resolvedBestInstances.size(), "Expected 2 resolved instance");
     assertEquals(
-        "8070",
-        resolvedBestInstances.get(0).getAddress(),
-        "Expected 8070 as better since less connections");
+        instanceId1,
+        resolvedBestInstances.get(0).getInstanceId(),
+        "Expected instanceId1 to be better since it has less connections");
     assertEquals(
-        "8030",
-        resolvedBestInstances.get(1).getAddress(),
-        "Expected 8030 as worse since more connectinos");
+        instanceId2,
+        resolvedBestInstances.get(1).getInstanceId(),
+        "Expected instanceId1 to be better since it has less connections");
   }
 
   private ServiceHealthInput getServiceHealth(String port, boolean isHealthy, String serviceName) {
