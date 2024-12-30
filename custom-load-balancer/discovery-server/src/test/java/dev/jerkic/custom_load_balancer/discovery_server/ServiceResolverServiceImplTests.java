@@ -2,6 +2,8 @@ package dev.jerkic.custom_load_balancer.discovery_server;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceModel;
+import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.service.ServiceManagement;
 import dev.jerkic.custom_load_balancer.discovery_server.service.ServiceResolverServiceImpl;
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
@@ -21,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @Slf4j
 @Transactional
 public class ServiceResolverServiceImplTests {
+  @Autowired private ServiceModelRepository serviceModelRepository;
   @Autowired private ServiceManagement serviceManagement;
   @Autowired private ServiceResolverServiceImpl serviceResolverService;
 
@@ -52,7 +55,6 @@ public class ServiceResolverServiceImplTests {
 
   @Test
   public void testResolveServiceToInstancesWhenMultipleServices() {
-
     // False target
     this.serviceManagement.registerService(
         RegisterInput.builder()
@@ -150,6 +152,41 @@ public class ServiceResolverServiceImplTests {
         instanceId2,
         resolvedBestInstances.get(1).getInstanceId(),
         "Expected instanceId1 to be better since it has less connections");
+  }
+
+  @Test
+  public void testResolveByServiceId() {
+    // Register true target
+    var serviceName = "test-service";
+
+    var registerInput1 =
+        RegisterInput.builder()
+            .serviceInfo(this.getServiceInfo(serviceName))
+            .serviceHealth(this.getServiceHealth("8070", true, serviceName))
+            .build();
+    registerInput1.getServiceHealth().setTimestamp(Instant.now().minusSeconds(100));
+    var instanceId1 = this.serviceManagement.registerService(registerInput1);
+
+    var instanceId2 =
+        this.serviceManagement.registerService(
+            RegisterInput.builder()
+                .serviceInfo(this.getServiceInfo(serviceName))
+                .serviceHealth(this.getServiceHealth("8030", true, serviceName))
+                .build());
+
+    var serviceId =
+        this.serviceModelRepository.findByServiceName(serviceName).map(ServiceModel::getId).get();
+
+    var resolvedBestInstances = this.serviceResolverService.resolveServiceForServiceId(serviceId);
+    assertEquals(2, resolvedBestInstances.size(), "Expected 2 resolved instance");
+    assertEquals(
+        instanceId2,
+        resolvedBestInstances.get(0).getInstanceId(),
+        "Expected instanceId2 as better since recorded after instanceId1");
+    assertEquals(
+        instanceId1,
+        resolvedBestInstances.get(1).getInstanceId(),
+        "Expected instanceId1 as worse since recorded before instanceId2");
   }
 
   private ServiceHealthInput getServiceHealth(String port, boolean isHealthy, String serviceName) {

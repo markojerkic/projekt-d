@@ -1,18 +1,14 @@
 package dev.jerkic.custom_load_balancer.discovery_server.service;
 
-import dev.jerkic.custom_load_balancer.discovery_server.model.BestInstance;
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceInstance;
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceModel;
-import dev.jerkic.custom_load_balancer.discovery_server.repository.BestInstanceRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceInstanceRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
 import java.sql.Date;
-import java.util.Collection;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -28,7 +24,6 @@ import org.springframework.web.server.ResponseStatusException;
 public class ServiceManagement implements ServiceHealthService {
   private final ServiceModelRepository serviceModelRepository;
   private final ServiceInstanceRepository serviceInstanceRepository;
-  private final BestInstanceRepository bestInstanceRepository;
   private final JdbcTemplate jdbcTemplate;
 
   @Override
@@ -103,42 +98,6 @@ public class ServiceManagement implements ServiceHealthService {
 
   public Iterable<ServiceModel> getServices() {
     return this.serviceModelRepository.findAll();
-  }
-
-  /**
-   * Return collection of instances. Group results by instanceId, sort by timestamp and for each
-   * instaceId, return only the latest instance
-   *
-   * @param serviceId
-   * @return collection of instances
-   */
-  public Collection<ServiceInstance> getInstacesForService(String serviceId) {
-    return this.bestInstanceRepository.findByServiceId(serviceId).stream()
-        .map(BestInstance::getServiceInstance)
-        .collect(Collectors.toList());
-    // return this.serviceInstanceRepository.findByServiceIdGroupedByInstanceId(serviceId);
-
-    // return this.jdbcTemplate.query(
-    //    """
-    //    select si.*
-    //    from service_instance si
-    //    join (
-    //      select * from best_instance where best_instance.service_id = :service_id
-    //    ) latest
-    //    on si.entry_id = latest.entry_id
-    //    order by si.instance_recorded_at desc, si.number_of_connections asc
-    //    """,
-    //    (rs, _) -> {
-    //      return ServiceInstance.builder()
-    //          .entryId(rs.getString("entry_id"))
-    //          .instanceId(rs.getString("instance_id"))
-    //          .isHealthy(rs.getBoolean("is_healthy"))
-    //          .address(rs.getString("address"))
-    //          .activeHttpRequests(rs.getLong("number_of_connections"))
-    //          .instanceRecordedAt(rs.getDate("instance_recorded_at"))
-    //          .build();
-    //    },
-    //    serviceId);
   }
 
   public ServiceModel getServiceInfo(String serviceId) {

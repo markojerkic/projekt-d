@@ -40,6 +40,16 @@ public class ServiceResolverServiceImpl implements ServiceResolverService {
         .map(this::mapToResolvedInstance);
   }
 
+  public List<ResolvedInstance> resolveServiceForServiceId(String serviceId) {
+    return this.bestInstanceRepository
+        .findByServiceId(
+            serviceId,
+            Sort.by(Order.desc("latestTimestamp"), Order.asc("serviceInstance.activeHttpRequests")))
+        .stream()
+        .map(this::mapToResolvedInstance)
+        .collect(Collectors.toList());
+  }
+
   @SuppressWarnings("unused")
   private Specification<BestInstance> getBestInstanceSpecification(String serviceName) {
     return (root, query, criteriaBuilder) ->

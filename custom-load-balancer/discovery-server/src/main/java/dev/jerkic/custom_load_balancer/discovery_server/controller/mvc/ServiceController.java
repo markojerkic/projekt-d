@@ -1,6 +1,7 @@
 package dev.jerkic.custom_load_balancer.discovery_server.controller.mvc;
 
 import dev.jerkic.custom_load_balancer.discovery_server.service.ServiceManagement;
+import dev.jerkic.custom_load_balancer.discovery_server.service.ServiceResolverServiceImpl;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Slf4j
 public class ServiceController {
   private final ServiceManagement serviceManagement;
+  private final ServiceResolverServiceImpl serviceResolverServiceImpl;
 
   @GetMapping
   public String index(Model model) {
@@ -23,7 +25,7 @@ public class ServiceController {
 
   @GetMapping("/service/{serviceId}")
   public String instances(Model model, @PathVariable String serviceId) {
-    var serviceInstances = this.serviceManagement.getInstacesForService(serviceId);
+    var serviceInstances = this.serviceResolverServiceImpl.resolveServiceForServiceId(serviceId);
     var serviceInfo = this.serviceManagement.getServiceInfo(serviceId);
 
     log.info("Service instances: {}", serviceInstances);
@@ -38,7 +40,7 @@ public class ServiceController {
   @HxRequest(boosted = false)
   @GetMapping("/service/{serviceId}")
   public String hxInstances(Model model, @PathVariable String serviceId) {
-    var serviceInstances = this.serviceManagement.getInstacesForService(serviceId);
+    var serviceInstances = this.serviceResolverServiceImpl.resolveServiceForServiceId(serviceId);
     var serviceInfo = this.serviceManagement.getServiceInfo(serviceId);
 
     log.info("Service instances: {}", serviceInstances);
