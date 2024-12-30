@@ -48,6 +48,7 @@ public class LoadBalancingService {
 
     var bestInstance = bestInstances.stream().findFirst();
     if (bestInstance.isPresent()) {
+      log.info("Incrementing active requests");
       this.incrementActiveRequests(bestInstance.get());
     }
 
@@ -56,8 +57,10 @@ public class LoadBalancingService {
 
   private void incrementActiveRequests(ResolvedInstance instance) {
     this.jdbcTemplate.update(
-        "UPDATE service_instance SET active_http_requests = active_http_requests + 1 WHERE"
-            + " instance_id = ?",
+        """
+        UPDATE service_instance SET active_http_requests = active_http_requests + 1 WHERE
+             instance_id = ?;
+        """,
         instance.getInstanceId());
   }
 
