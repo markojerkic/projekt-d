@@ -5,7 +5,6 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-
 env:
   REGISTRY: docker.io
   DISCOVERY_IMAGE: markojerkic/discovery-server
