@@ -4,6 +4,8 @@ import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceModel;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ResolvedInstance;
 import jakarta.transaction.Transactional;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,7 @@ public class LoadBalancingService {
 
   public Optional<ResolvedInstance> findBestInstanceForBaseHref(String requestedUri) {
     var baseHref = this.getBaseHrefFromURI(requestedUri);
+    log.debug("Base href for uri {}: {}", requestedUri, baseHref);
     if (baseHref == null) return Optional.empty();
 
     var service = this.serviceModelRepository.findByBaseHref(baseHref);
@@ -65,8 +68,14 @@ public class LoadBalancingService {
     if (requestedUri == null) {
       return null;
     }
+
     if (!requestedUri.startsWith("/")) {
-      return null;
+      try {
+        requestedUri = new URI(requestedUri).getPath();
+      } catch (URISyntaxException e) {
+        log.error("Error parsing uri", e);
+        return null;
+      }
     }
 
     return "/" + requestedUri.split("/")[1];
