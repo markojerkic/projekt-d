@@ -117,34 +117,6 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>build-image-no-fork</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                    <image>
-                        <name>docker.io/markojerkic/discovery-server</name>
-                        <env>
-                            <BP_JVM_VERSION>23</BP_JVM_VERSION>
-                        </env>
-                    </image>
                 </configuration>
             </plugin>
         </plugins>
