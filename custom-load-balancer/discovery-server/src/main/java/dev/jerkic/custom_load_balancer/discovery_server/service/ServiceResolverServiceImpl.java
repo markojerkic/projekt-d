@@ -4,8 +4,6 @@ import dev.jerkic.custom_load_balancer.discovery_server.model.BestInstance;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.BestInstanceRepository;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ResolvedInstance;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceResolverService;
-import jakarta.transaction.Transactional;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -41,10 +39,11 @@ public class ServiceResolverServiceImpl implements ServiceResolverService {
         .map(this::mapToResolvedInstance);
   }
 
+  @SuppressWarnings("unused")
   private Specification<BestInstance> getBestInstanceSpecification(String serviceName) {
-    return (root, _, criteriaBuilder) -> {
-      return criteriaBuilder.equal(root.get("serviceInstance").get("serviceModel").get("serviceName"), serviceName);
-    };
+    return (root, query, criteriaBuilder) ->
+        criteriaBuilder.equal(
+            root.get("serviceInstance").get("serviceModel").get("serviceName"), serviceName);
   }
 
   private ResolvedInstance mapToResolvedInstance(BestInstance bestInstance) {

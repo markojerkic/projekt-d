@@ -10,10 +10,8 @@ import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceHealthInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceInfo;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,14 +22,6 @@ public class ServiceResolverServiceImplTests {
   @Autowired private ServiceInstanceRepository serviceInstanceRepository;
   @Autowired private ServiceManagement serviceManagement;
   @Autowired private ServiceResolverServiceImpl serviceResolverService;
-
-  @Autowired private EntityManager entityManager;
-
-  @AfterEach
-  public void tearDown() {
-    this.serviceInstanceRepository.deleteAllInBatch();
-    this.serviceModelRepository.deleteAllInBatch();
-  }
 
   @Test
   @Transactional
@@ -55,12 +45,10 @@ public class ServiceResolverServiceImplTests {
             .health(healthUpdate)
             .build());
 
-    // Commit transaction
-    this.entityManager.flush();
-    this.entityManager.clear();
+    assertEquals(2, this.serviceInstanceRepository.count(), "Expected 2 instances");
 
     var resolvedBestInstances = this.serviceResolverService.resolveService(serviceName);
-    assertEquals(1, resolvedBestInstances.size());
+    assertEquals(1, resolvedBestInstances.size(), "Expected 1 resolved instance");
     assertEquals("8070", resolvedBestInstances.get(0).getAddress());
   }
 
