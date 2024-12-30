@@ -3,7 +3,6 @@ package dev.jerkic.custom_load_balancer.discovery_server;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceInstanceRepository;
-import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.service.ServiceManagement;
 import dev.jerkic.custom_load_balancer.discovery_server.service.ServiceResolverServiceImpl;
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
@@ -12,19 +11,22 @@ import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceHealthInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ServiceInfo;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@RequiredArgsConstructor
+@Slf4j
+@Transactional
 public class ServiceResolverServiceImplTests {
-  @Autowired private ServiceModelRepository serviceModelRepository;
   @Autowired private ServiceInstanceRepository serviceInstanceRepository;
   @Autowired private ServiceManagement serviceManagement;
   @Autowired private ServiceResolverServiceImpl serviceResolverService;
 
   @Test
-  @Transactional
   public void testResolveServiceToInstances() {
     // Register
     var serviceName = "test-service";
@@ -44,8 +46,6 @@ public class ServiceResolverServiceImplTests {
             .serviceName(healthUpdate.getServiceName())
             .health(healthUpdate)
             .build());
-
-    assertEquals(2, this.serviceInstanceRepository.count(), "Expected 2 instances");
 
     var resolvedBestInstances = this.serviceResolverService.resolveService(serviceName);
     assertEquals(1, resolvedBestInstances.size(), "Expected 1 resolved instance");

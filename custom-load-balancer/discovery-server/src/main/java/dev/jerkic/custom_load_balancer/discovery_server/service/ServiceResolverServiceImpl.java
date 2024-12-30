@@ -4,11 +4,12 @@ import dev.jerkic.custom_load_balancer.discovery_server.model.BestInstance;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.BestInstanceRepository;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ResolvedInstance;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceResolverService;
-import java.util.Collections;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,20 +17,20 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
+@Transactional
 public class ServiceResolverServiceImpl implements ServiceResolverService {
   private final BestInstanceRepository bestInstanceRepository;
 
   @Override
   public List<ResolvedInstance> resolveService(String serviceName) {
-    this.bestInstanceRepository
+    return this.bestInstanceRepository
         .findAll(
             this.getBestInstanceSpecification(serviceName),
             Sort.by(Order.desc("latestTimestamp"), Order.asc("serviceInstance.activeHttpRequests")))
         .stream()
         .map(this::mapToResolvedInstance)
         .collect(Collectors.toList());
-
-    return Collections.emptyList();
   }
 
   @Override

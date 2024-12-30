@@ -10,5 +10,8 @@ public interface BestInstanceRepository
     extends JpaRepository<BestInstance, String>, JpaSpecificationExecutor<BestInstance> {
   List<BestInstance> findByServiceId(String serviceId);
 
+  // Find by serviceInstce.serviceMode.serviceName
+  List<BestInstance> findByServiceInstance_serviceModel_serviceName(String serviceName);
+
   Optional<BestInstance> findFirstByServiceInstance_serviceModel_serviceName(String serviceName);
 }
