@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ServiceModelRepository extends JpaRepository<ServiceModel, String> {
   Optional<ServiceModel> findByServiceName(String serviceName);
+
+  Optional<ServiceModel> findByBaseHref(String baseHref);
 }

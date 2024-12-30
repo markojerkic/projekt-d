@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,7 +28,7 @@ import lombok.ToString;
     })
 @ToString(exclude = {"serviceModel"})
 @EqualsAndHashCode(exclude = {"serviceModel"})
-public class ServiceInstance {
+public class ServiceInstance implements Cloneable {
   @Id private String entryId;
   private String instanceId;
   private boolean isHealthy;

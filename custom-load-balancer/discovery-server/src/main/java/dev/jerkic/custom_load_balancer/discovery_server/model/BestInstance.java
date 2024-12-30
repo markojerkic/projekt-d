@@ -32,7 +32,7 @@ import org.hibernate.annotations.Synchronize;
 @Synchronize({"service_instance"})
 @Getter
 @NoArgsConstructor
-public class BestInstance {
+public class BestInstance implements Cloneable {
   @Id
   @Column(name = "entry_id")
   private String entryId;
