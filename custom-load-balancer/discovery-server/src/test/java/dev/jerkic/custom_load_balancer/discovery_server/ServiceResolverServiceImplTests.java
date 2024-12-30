@@ -2,7 +2,6 @@ package dev.jerkic.custom_load_balancer.discovery_server;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceInstanceRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.service.ServiceManagement;
 import dev.jerkic.custom_load_balancer.discovery_server.service.ServiceResolverServiceImpl;
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
@@ -22,7 +21,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 @Slf4j
 @Transactional
 public class ServiceResolverServiceImplTests {
-  @Autowired private ServiceInstanceRepository serviceInstanceRepository;
   @Autowired private ServiceManagement serviceManagement;
   @Autowired private ServiceResolverServiceImpl serviceResolverService;
 
@@ -90,45 +88,35 @@ public class ServiceResolverServiceImplTests {
   public void testMultipleInstances() {
     // Register true target
     var serviceName = "test-service";
-    var initialHealth = this.getServiceHealth("8090", true, serviceName);
-    var registerInput =
+
+    var registerInput1 =
         RegisterInput.builder()
             .serviceInfo(this.getServiceInfo(serviceName))
-            .serviceHealth(initialHealth)
+            .serviceHealth(this.getServiceHealth("8070", true, serviceName))
             .build();
+    registerInput1.getServiceHealth().setTimestamp(Instant.now().minusSeconds(100));
+    var instanceId1 = this.serviceManagement.registerService(registerInput1);
 
-    var instanceId1 = this.serviceManagement.registerService(registerInput);
-    var healthUpdate1 = this.getServiceHealth("8070", true, serviceName);
-    healthUpdate1.setTimestamp(Instant.now().minusSeconds(100));
-    this.serviceManagement.updateHealth(
-        HealthUpdateInput.builder()
-            .instanceId(instanceId1)
-            .serviceName(healthUpdate1.getServiceName())
-            .health(healthUpdate1)
-            .build());
-
-    var instanceId2 = this.serviceManagement.registerService(registerInput);
-    var healthUpdate2 = this.getServiceHealth("8030", true, serviceName);
-    this.serviceManagement.updateHealth(
-        HealthUpdateInput.builder()
-            .instanceId(instanceId2)
-            .serviceName(healthUpdate2.getServiceName())
-            .health(healthUpdate2)
-            .build());
+    var instanceId2 =
+        this.serviceManagement.registerService(
+            RegisterInput.builder()
+                .serviceInfo(this.getServiceInfo(serviceName))
+                .serviceHealth(this.getServiceHealth("8030", true, serviceName))
+                .build());
 
     var resolvedBestInstances = this.serviceResolverService.resolveService(serviceName);
     assertEquals(2, resolvedBestInstances.size(), "Expected 2 resolved instance");
     assertEquals(
-        "8030",
-        resolvedBestInstances.get(0).getAddress(),
-        "Expected 8030 as better, since last recorded");
+        instanceId2,
+        resolvedBestInstances.get(0).getInstanceId(),
+        "Expected instanceId2 as better since recorded after instanceId1");
     assertEquals(
-        "8070",
-        resolvedBestInstances.get(1).getAddress(),
-        "Expected 8070 as worse since recorded before 8030");
+        instanceId1,
+        resolvedBestInstances.get(1).getInstanceId(),
+        "Expected instanceId1 as worse since recorded before instanceId2");
   }
 
-  @Test
+  @Test()
   public void testMultipleInstancesWithDifferentActiveConnections() {
     // Register true target
     var serviceName = "test-service";
