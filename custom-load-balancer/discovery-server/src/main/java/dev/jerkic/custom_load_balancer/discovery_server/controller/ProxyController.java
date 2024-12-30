@@ -2,7 +2,9 @@ package dev.jerkic.custom_load_balancer.discovery_server.controller;
 
 import dev.jerkic.custom_load_balancer.discovery_server.config.ProxyRestTemplate;
 import dev.jerkic.custom_load_balancer.discovery_server.service.LoadBalancingService;
+import dev.jerkic.custom_load_balancer.discovery_server.util.RequestEntityConverter;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +19,13 @@ public class ProxyController {
   private final LoadBalancingService loadBalancingService;
 
   @RequestMapping("/**")
-  public ResponseEntity<?> proxy(HttpServletRequest request) {
+  public ResponseEntity<?> proxy(HttpServletRequest request) throws IOException {
     var requestedPath = request.getRequestURI();
 
     log.info("Requested path: {}", requestedPath);
     log.info("Request: {}", request.getRequestURI());
 
-    return ResponseEntity.ok("Nema još ništa");
+    var requestEntity = RequestEntityConverter.fromHttpServletRequest(request);
+    return this.restTemplate.exchange(requestEntity, Object.class);
   }
 }
