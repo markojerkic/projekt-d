@@ -59,14 +59,14 @@ jobs:
       if: github.event_name != 'pull_request'
       run: |
         cd custom-load-balancer/discovery-server
-        flyctl deploy --image ${{ env.REGISTRY }}/${{ env.DISCOVERY_IMAGE }}:latest
+        flyctl deploy --remote-only --image ${{ env.REGISTRY }}/${{ env.DISCOVERY_IMAGE }}:latest
       env:
         FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
-    - name: Deploy Example Server to fly.io
-      if: github.event_name != 'pull_request'
-      run: |
-        cd custom-load-balancer/examples/example-server-1
-        flyctl deploy --image ${{ env.REGISTRY }}/${{ env.EXAMPLE_IMAGE }}:latest
-      env:
-        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+    # - name: Deploy Example Server to fly.io
+    #   if: github.event_name != 'pull_request'
+    #   run: |
+    #     cd custom-load-balancer/examples/example-server-1
+    #     flyctl deploy --remote-only --image ${{ env.REGISTRY }}/${{ env.EXAMPLE_IMAGE }}:latest
+    #   env:
+    #     FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
