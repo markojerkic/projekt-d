@@ -84,7 +84,6 @@ public class ServiceManagement implements ServiceHealthService {
             ServiceInstance.builder()
                 // empty shell only containing PK for JPA to connect them
                 .entryId(UUID.randomUUID().toString())
-                // .serviceModel(ServiceModel.builder().id(service.getId()).build())
                 .serviceModel(service)
                 .instanceId(healthUpdateInput.getInstanceId())
                 .address(this.buildInstanceAddress(healthUpdateInput.getHealth().getServerPort()))
