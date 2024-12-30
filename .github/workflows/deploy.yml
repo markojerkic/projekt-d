@@ -33,31 +33,15 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build Discovery Server JAR
+    - name: Build and push Discovery Server
       run: |
         cd custom-load-balancer/discovery-server
-        mvn clean package -DskipTests
+        mvn clean compile jib:build -Djib.to.image=${{ env.REGISTRY }}/${{ env.DISCOVERY_IMAGE }}:latest -Djib.to.auth.username=${{ secrets.DOCKERHUB_USERNAME }} -Djib.to.auth.password=${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build and push Discovery Server
-      uses: docker/build-push-action@v5
-      with:
-        context: ./custom-load-balancer/discovery-server
-        file: ./custom-load-balancer/discovery-server/Dockerfile
-        push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ env.DISCOVERY_IMAGE }}:latest
-
-    - name: Build Example Server JAR
-      run: |
-        cd custom-load-balancer/examples/example-server-1
-        mvn clean package -DskipTests
-
-    - name: Build and push Example Server
-      uses: docker/build-push-action@v5
-      with:
-        context: ./custom-load-balancer/examples/example-server-1
-        file: ./custom-load-balancer/examples/example-server-1/Dockerfile
-        push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ env.EXAMPLE_IMAGE }}:latest
+    # - name: Build and push Example Server
+    #   run: |
+    #     cd custom-load-balancer/examples/example-server-1
+    #     mvn clean compile jib:build -Djib.to.image=${{ env.REGISTRY }}/${{ env.EXAMPLE_IMAGE }}:latest -Djib.to.auth.username=${{ secrets.DOCKERHUB_USERNAME }} -Djib.to.auth.password=${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Install flyctl
       if: github.event_name != 'pull_request'
