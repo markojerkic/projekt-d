@@ -215,7 +215,7 @@ public class ServiceManagementTests {
 
   private ServiceHealthInput getServiceHealth(String port, boolean isHealthy, String serviceName) {
     return ServiceHealthInput.builder()
-        .address(port)
+        .serverPort(port)
         .isHealthy(isHealthy)
         .serviceName(serviceName)
         .numberOfConnections(0l)

@@ -5,8 +5,6 @@ import dev.jerkic.custom_load_balancer.discovery_server.service.LoadBalancingSer
 import java.io.IOException;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -14,6 +12,7 @@ import org.springframework.http.client.ClientHttpResponse;
 
 @RequiredArgsConstructor
 public class LoadBalancingHttpRequestInterceptor implements ClientHttpRequestInterceptor {
+
   private final LoadBalancingService loadBalancer;
 
   @Override
@@ -26,25 +25,15 @@ public class LoadBalancingHttpRequestInterceptor implements ClientHttpRequestInt
           "No instance found for the given base href " + request.getURI());
     }
 
-    URI uri = loadBalancer.getUri(request.getURI());
+    URI uri = null;
 
     HttpRequest newRequest =
-        new HttpRequest() {
-          @Override
-          public HttpMethod getMethod() {
-            return request.getMethod();
-          }
-
-          @Override
-          public URI getURI() {
-            return uri;
-          }
-
-          @Override
-          public HttpHeaders getHeaders() {
-            return request.getHeaders();
-          }
-        };
+        new HttpRequestImplementation(
+            uri,
+            request.getURI().toString(),
+            request.getHeaders(),
+            request.getMethod(),
+            request.getAttributes());
     return execution.execute(newRequest, body);
   }
 }

@@ -13,5 +13,5 @@ public class ServiceHealthInput {
   @NotNull private boolean isHealthy;
   @NotNull private Long numberOfConnections;
   @NotNull private Instant timestamp;
-  @NotNull @NotEmpty private String address;
+  @NotNull @NotEmpty private String serverPort;
 }

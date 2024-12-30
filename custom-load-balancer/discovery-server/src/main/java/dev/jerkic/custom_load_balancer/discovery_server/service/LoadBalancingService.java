@@ -1,5 +1,6 @@
 package dev.jerkic.custom_load_balancer.discovery_server.service;
 
+import dev.jerkic.custom_load_balancer.discovery_server.config.ProxyRestTemplate;
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceModel;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ResolvedInstance;
@@ -11,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +21,7 @@ public class LoadBalancingService {
   private final ServiceModelRepository serviceModelRepository;
   private final ServiceResolverServiceImpl serviceResolverService;
   private final JdbcTemplate jdbcTemplate;
-  private final RestTemplate restTemplate = new RestTemplate();
+  private final ProxyRestTemplate restTemplate;
 
   public ResponseEntity<?> proxyRequest(HttpServletRequest request) {
     var requestedPath = request.getRequestURI();

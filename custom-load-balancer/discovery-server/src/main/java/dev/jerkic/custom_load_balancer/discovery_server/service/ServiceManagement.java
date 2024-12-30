@@ -7,6 +7,7 @@ import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelR
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
+import jakarta.servlet.http.HttpServletRequest;
 import java.sql.Date;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +26,14 @@ public class ServiceManagement implements ServiceHealthService {
   private final ServiceModelRepository serviceModelRepository;
   private final ServiceInstanceRepository serviceInstanceRepository;
   private final JdbcTemplate jdbcTemplate;
+  private final HttpServletRequest request;
 
   @Override
   @Transactional
   public String registerService(RegisterInput registerInput) {
+
+    var remoteHost = this.request.getRemoteHost();
+    var protocol = this.request.getProtocol();
 
     var serviceInfo = registerInput.getServiceInfo();
     var registeredService =
@@ -55,11 +60,17 @@ public class ServiceManagement implements ServiceHealthService {
             .serviceModel(serviceModel)
             .isHealthy(registerInput.getServiceHealth().isHealthy())
             .instanceRecordedAt(Date.from(registerInput.getServiceHealth().getTimestamp()))
-            .address(registerInput.getServiceHealth().getAddress())
+            .address(
+                this.buildInstanceAddress(
+                    registerInput.getServiceHealth().getServerPort(), remoteHost, protocol))
             .activeHttpRequests(registerInput.getServiceHealth().getNumberOfConnections())
             .build();
 
     return this.serviceInstanceRepository.save(instance).getInstanceId().toString();
+  }
+
+  private String buildInstanceAddress(String port, String remoteHost, String protocol) {
+    return String.format("%s://%s:%s", protocol, remoteHost, port);
   }
 
   @Transactional
@@ -85,7 +96,7 @@ public class ServiceManagement implements ServiceHealthService {
                 // .serviceModel(ServiceModel.builder().id(service.getId()).build())
                 .serviceModel(service)
                 .instanceId(healthUpdateInput.getInstanceId())
-                .address(healthUpdateInput.getHealth().getAddress())
+                .address(healthUpdateInput.getHealth().getServerPort())
                 .instanceRecordedAt(Date.from(healthUpdateInput.getHealth().getTimestamp()))
                 .activeHttpRequests(healthUpdateInput.getHealth().getNumberOfConnections())
                 .isHealthy(healthUpdateInput.getHealth().isHealthy())
