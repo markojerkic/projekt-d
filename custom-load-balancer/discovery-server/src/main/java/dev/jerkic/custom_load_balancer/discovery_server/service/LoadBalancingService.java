@@ -1,7 +1,6 @@
 package dev.jerkic.custom_load_balancer.discovery_server.service;
 
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceModel;
-import dev.jerkic.custom_load_balancer.discovery_server.repository.BestInstanceRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ResolvedInstance;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,11 +18,10 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 @Transactional
 public class LoadBalancingService {
-  private final BestInstanceRepository bestInstanceRepository;
   private final ServiceModelRepository serviceModelRepository;
   private final ServiceResolverServiceImpl serviceResolverService;
   private final JdbcTemplate jdbcTemplate;
-  private final RestTemplate restTemplate;
+  private final RestTemplate restTemplate = new RestTemplate();
 
   public ResponseEntity<?> proxyRequest(HttpServletRequest request) {
     var requestedPath = request.getRequestURI();
@@ -64,8 +62,13 @@ public class LoadBalancingService {
   }
 
   private String getBaseHrefFromURI(String requestedUri) {
-    if (requestedUri == null) return null;
+    if (requestedUri == null) {
+      return null;
+    }
+    if (!requestedUri.startsWith("/")) {
+      return null;
+    }
 
-    return requestedUri.split("/")[1];
+    return "/" + requestedUri.split("/")[1];
   }
 }
