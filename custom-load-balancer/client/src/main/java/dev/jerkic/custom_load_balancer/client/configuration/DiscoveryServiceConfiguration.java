@@ -119,16 +119,7 @@ public class DiscoveryServiceConfiguration {
         .timestamp(Instant.now())
         .isHealthy(true)
         .numberOfConnections(0l)
-        .address(this.getCurrentServerAddress())
+        .serverPort(String.valueOf(this.serverPort))
         .build();
-  }
-
-  /**
-   * Get address of current server
-   *
-   * @return String host:port
-   */
-  private String getCurrentServerAddress() {
-    return String.valueOf(this.serverPort);
   }
 }
