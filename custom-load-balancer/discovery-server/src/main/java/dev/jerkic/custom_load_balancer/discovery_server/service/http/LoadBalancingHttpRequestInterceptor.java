@@ -30,6 +30,11 @@ public class LoadBalancingHttpRequestInterceptor implements ClientHttpRequestInt
     }
 
     var uri = this.getProxiedUriFromOriginal(bestInstance.get(), request);
+
+    var headers = request.getHeaders();
+    headers.add("X-Forwarded-Host", request.getURI().getHost());
+    headers.add("X-Load-balanced", "true");
+
     HttpRequest newRequest =
         new HttpRequestImplementation(
             uri,

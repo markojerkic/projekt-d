@@ -6,8 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,11 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@Order(Ordered.LOWEST_PRECEDENCE)
 public class ProxyController {
   private final ProxyRestTemplate restTemplate;
 
-  @RequestMapping(value = "/{path:^(?!assets)}/**")
+  @RequestMapping("/**")
   public ResponseEntity<?> proxy(HttpServletRequest request) throws IOException {
     var requestedPath = request.getRequestURI();
 
