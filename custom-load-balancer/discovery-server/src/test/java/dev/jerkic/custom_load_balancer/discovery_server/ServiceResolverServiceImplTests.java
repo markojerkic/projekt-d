@@ -48,6 +48,42 @@ public class ServiceResolverServiceImplTests {
   }
 
   @Test
+  public void testTwoInstancesWithSamePort() {
+    // Register
+    var serviceName = "test-service";
+
+    var initialHealth1 = this.getServiceHealth("8090", true, serviceName);
+    var registerInput1 =
+        RegisterInput.builder()
+            .serviceInfo(this.getServiceInfo(serviceName))
+            .serviceHealth(initialHealth1)
+            .build();
+    var instanceId1 = this.serviceManagement.registerService(registerInput1);
+
+    var initialHealth2 = this.getServiceHealth("8090", true, serviceName);
+    var registerInput2 =
+        RegisterInput.builder()
+            .serviceInfo(this.getServiceInfo(serviceName))
+            .serviceHealth(initialHealth2)
+            .build();
+    registerInput2.getServiceHealth().setTimestamp(Instant.now().minusSeconds(100));
+    var instanceId2 = this.serviceManagement.registerService(registerInput2);
+
+    assertEquals(
+        instanceId1,
+        instanceId2,
+        "Two instace registrations with same addr and port should have same instanceId");
+
+    var resolvedBestInstances = this.serviceResolverService.resolveService(serviceName);
+    assertEquals(
+        1,
+        resolvedBestInstances.size(),
+        "Two instances with same addr/port should resolve to one instance");
+    assertEquals("http://localhost:8090", resolvedBestInstances.get(0).getAddress());
+    assertEquals(instanceId1, resolvedBestInstances.get(0).getInstanceId());
+  }
+
+  @Test
   public void testResolveServiceToInstances() {
     // Register
     var serviceName = "test-service";
