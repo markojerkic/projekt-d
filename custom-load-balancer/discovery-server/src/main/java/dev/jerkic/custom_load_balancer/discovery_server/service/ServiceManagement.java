@@ -4,6 +4,7 @@ import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceInstance;
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceModel;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceInstanceRepository;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
+import dev.jerkic.custom_load_balancer.discovery_server.util.Constants;
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
@@ -14,6 +15,7 @@ import java.sql.Date;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -51,19 +53,43 @@ public class ServiceManagement implements ServiceHealthService {
       serviceModel = registeredService.get();
     }
 
-    var instance =
-        ServiceInstance.builder()
-            .entryId(UUID.randomUUID().toString())
-            .instanceId(UUID.randomUUID().toString())
-            // empty shell only containing PK for JPA to connect them
-            .serviceModel(serviceModel)
-            .isHealthy(registerInput.getServiceHealth().isHealthy())
-            .instanceRecordedAt(Date.from(registerInput.getServiceHealth().getTimestamp()))
-            .address(this.buildInstanceAddress(registerInput.getServiceHealth().getServerPort()))
-            .activeHttpRequests(registerInput.getServiceHealth().getNumberOfConnections())
-            .build();
+    var resolvedAddr = this.buildInstanceAddress(registerInput.getServiceHealth().getServerPort());
 
-    return this.serviceInstanceRepository.save(instance).getInstanceId().toString();
+    return this.serviceInstanceRepository
+        .findAll(
+            this.findByServiceIdAddress(serviceModel.getId(), resolvedAddr),
+            Constants.SORT_INSTANCE)
+        .stream()
+        .findFirst()
+        .map(ServiceInstance::getServiceModel)
+        .map(ServiceModel::getId)
+        .orElseGet(
+            () -> {
+              var instance =
+                  ServiceInstance.builder()
+                      .entryId(UUID.randomUUID().toString())
+                      .instanceId(UUID.randomUUID().toString())
+                      // empty shell only containing PK for JPA to connect them
+                      .serviceModel(serviceModel)
+                      .isHealthy(registerInput.getServiceHealth().isHealthy())
+                      .instanceRecordedAt(
+                          Date.from(registerInput.getServiceHealth().getTimestamp()))
+                      .address(resolvedAddr)
+                      .activeHttpRequests(registerInput.getServiceHealth().getNumberOfConnections())
+                      .build();
+
+              return this.serviceInstanceRepository.save(instance).getInstanceId().toString();
+            });
+  }
+
+  @SuppressWarnings("unused")
+  private Specification<ServiceInstance> findByServiceIdAddress(String serviceId, String address) {
+    return (root, query, criteriaBuilder) -> {
+      var serviceModelJoin = root.join("serviceModel");
+      return criteriaBuilder.and(
+          criteriaBuilder.equal(serviceModelJoin.get("id"), serviceId),
+          criteriaBuilder.equal(root.get("address"), address));
+    };
   }
 
   @Transactional

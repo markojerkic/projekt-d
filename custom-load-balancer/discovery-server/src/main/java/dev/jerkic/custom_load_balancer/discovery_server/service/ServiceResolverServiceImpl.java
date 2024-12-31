@@ -2,6 +2,7 @@ package dev.jerkic.custom_load_balancer.discovery_server.service;
 
 import dev.jerkic.custom_load_balancer.discovery_server.model.BestInstance;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.BestInstanceRepository;
+import dev.jerkic.custom_load_balancer.discovery_server.util.Constants;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ResolvedInstance;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceResolverService;
 import jakarta.transaction.Transactional;
@@ -10,8 +11,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -25,9 +24,7 @@ public class ServiceResolverServiceImpl implements ServiceResolverService {
   @Override
   public List<ResolvedInstance> resolveService(String serviceName) {
     return this.bestInstanceRepository
-        .findAll(
-            this.getBestInstanceSpecification(serviceName),
-            Sort.by(Order.desc("latestTimestamp"), Order.asc("serviceInstance.activeHttpRequests")))
+        .findAll(this.getBestInstanceSpecification(serviceName), Constants.SORT_INSTANCE)
         .stream()
         .map(this::mapToResolvedInstance)
         .collect(Collectors.toList());
@@ -41,11 +38,7 @@ public class ServiceResolverServiceImpl implements ServiceResolverService {
   }
 
   public List<ResolvedInstance> resolveServiceForServiceId(String serviceId) {
-    return this.bestInstanceRepository
-        .findByServiceId(
-            serviceId,
-            Sort.by(Order.desc("latestTimestamp"), Order.asc("serviceInstance.activeHttpRequests")))
-        .stream()
+    return this.bestInstanceRepository.findByServiceId(serviceId, Constants.SORT_INSTANCE).stream()
         .map(this::mapToResolvedInstance)
         .collect(Collectors.toList());
   }
