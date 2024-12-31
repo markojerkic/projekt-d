@@ -18,6 +18,10 @@ class HttpRequestImplementation implements HttpRequest {
   @Override
   public HttpHeaders getHeaders() {
     this.originalHeaders.add("X-Forwarded-Host", this.originalUrl);
+    System.out.println("TU sam");
+    System.out.println("TU sam");
+    System.out.println("TU sam");
+    System.out.println("TU sam");
     return this.originalHeaders;
   }
 
