@@ -90,6 +90,29 @@ function rebouldInstanceColorsCss() {
 
 /**
  * @param {string} instanceId
+ * @param {string} selectedColor
+ * @returns {void}
+ */
+function addSelectedColorToCss(instanceId, selectedColor) {
+	let instanceStyle = document.getElementById("instance-style");
+	if (!instanceStyle) {
+		console.log("Creating instance style");
+		instanceStyle = document.createElement("style");
+		instanceStyle.id = "instance-style";
+		document.head.appendChild(instanceStyle);
+	} else {
+		console.log("Appending to instance style");
+	}
+
+	instanceStyle.innerHTML += `
+        [data-instance-id="${instanceId}"] {
+            background-color: ${selectedColor};
+        }
+    `;
+}
+
+/**
+ * @param {string} instanceId
  * @param {HTMLElement} element
  * @param {string} selectedColor
  * @returns {void}
