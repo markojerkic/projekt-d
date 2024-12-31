@@ -8,6 +8,8 @@ import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
 import dev.jerkic.custom_load_balancer.shared.service.ServiceHealthService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.Date;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -124,18 +126,53 @@ public class ServiceManagement implements ServiceHealthService {
   }
 
   private String buildInstanceAddress(String port) {
-    // Get the first IP from Fly-Client-IP header if present
-    var remoteHost = this.request.getHeader("Fly-Client-IP");
-    if (remoteHost == null || !remoteHost.isEmpty()) {
-      // Fallback to remote host if X-Forwarded-For is not present
-      remoteHost = this.request.getRemoteHost();
+    // Try to get the client IP in order of preference
+    String clientIp = null;
+
+    // 1. First try Fly-Client-IP header (most reliable for Fly.io)
+    clientIp = this.request.getHeader("Fly-Client-IP");
+
+    // 2. Then try X-Forwarded-For header
+    if (clientIp == null || clientIp.isEmpty()) {
+      String forwardedFor = this.request.getHeader("X-Forwarded-For");
+      if (forwardedFor != null && !forwardedFor.isEmpty()) {
+        // X-Forwarded-For can contain multiple IPs, get the first one
+        clientIp = forwardedFor.split(",")[0].trim();
+      }
+    }
+
+    // 3. Then try X-Real-IP header
+    if (clientIp == null || clientIp.isEmpty()) {
+      clientIp = this.request.getHeader("X-Real-IP");
+    }
+
+    // 4. Finally fallback to remote address if nothing else works
+    if (clientIp == null || clientIp.isEmpty()) {
+      clientIp = this.request.getRemoteAddr();
+    }
+
+    if (!this.isPublicIp(clientIp)) {
+      log.warn("IP address: {} does not seem to be a public IP address", clientIp);
     }
 
     var protocol = this.request.getScheme();
-
     // Remove any surrounding brackets from IPv6 addresses
-    remoteHost = remoteHost.replaceAll("[\\[\\]]", "");
+    clientIp = clientIp != null ? clientIp.replaceAll("[\\[\\]]", "") : "unknown";
 
-    return String.format("%s://%s:%s", protocol, remoteHost, port);
+    return String.format("%s://%s:%s", protocol, clientIp, port);
+  }
+
+  // Optional: Helper method to validate if an IP is public
+  private boolean isPublicIp(String ip) {
+    try {
+      var address = InetAddress.getByName(ip);
+      return !(address.isSiteLocalAddress()
+          || address.isLoopbackAddress()
+          || address.isLinkLocalAddress()
+          || address.isMulticastAddress());
+    } catch (UnknownHostException e) {
+      log.error("Error validating IP address", e);
+      return false;
+    }
   }
 }
