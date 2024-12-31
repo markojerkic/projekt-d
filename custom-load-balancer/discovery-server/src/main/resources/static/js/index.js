@@ -12,10 +12,16 @@ function updateTimes() {
 
 function watchHtmxTest() {
 	htmx.on("htmx:afterOnLoad", function (event) {
-		console.log("TU sam");
 		/** @type {XMLHttpRequest} */
 		const responseXHR = event.detail.xhr;
 		const instanceId = getHeader("X-Lb-instance", responseXHR);
+
+		const isSuccessful = responseXHR.status >= 200 && responseXHR.status < 300;
+
+		if (!isSuccessful) {
+			console.error("Request failed", responseXHR);
+			return;
+		}
 
 		const sourceELementAttributes = event.detail.elt?.attributes;
 
