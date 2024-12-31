@@ -79,6 +79,9 @@ public class ServiceResolverServiceImplTests {
         "Two instances with same addr/port should resolve to one instance");
     assertEquals("http://localhost:8090", resolvedBestInstances.get(0).getAddress());
     assertEquals(instanceId1, resolvedBestInstances.get(0).getInstanceId());
+
+    var bestInstance = this.serviceResolverService.resolveBestInstance(serviceName);
+    assertEquals(instanceId1, bestInstance.get().getInstanceId());
   }
 
   @Test
