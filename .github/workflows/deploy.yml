@@ -62,3 +62,11 @@ jobs:
         flyctl deploy --local-only --image ${{ env.DISCOVERY_IMAGE }}:latest
       env:
         FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+    - name: Deploy Example Server to fly.io
+      if: github.event_name != 'pull_request'
+      run: |
+        cd custom-load-balancer/examples/example-server-1
+        flyctl deploy --local-only --image ${{ env.EXAMPLE_IMAGE }}:latest
+      env:
+        FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
