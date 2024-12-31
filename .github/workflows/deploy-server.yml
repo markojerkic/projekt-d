@@ -46,7 +46,7 @@ jobs:
           host: ${{ env.DISCOVERY_SERVER_HOST }}
           username: ${{ env.DISCOVERY_SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "./docker-compose.yml"
+          source: "./custom-load-balancer/discovery-server/docker-compose.yml"
           target: "~/projects/projekt-d/discovery-server/docker-compose.yml"
 
       - name: SCP docker-compose file for example-server-1
@@ -55,7 +55,7 @@ jobs:
           host: ${{ env.DISCOVERY_SERVER_HOST }}
           username: ${{ env.DISCOVERY_SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "./docker-compose.yml"
+          source: "./custom-load-balancer/examples/example-server-1/docker-compose.yml"
           target: "~/projects/projekt-d/example-server-1/docker-compose.yml"
 
       - name: Deploy to server
