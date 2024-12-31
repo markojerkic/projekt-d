@@ -18,3 +18,7 @@ primary_region = 'otp'
 
 [[vm]]
   size = 'shared-cpu-2x'
+
+[mounts]
+  source = "litefs"
+  destination = "/var/lib/litefs"
