@@ -21,6 +21,7 @@ function watchHtmxTest() {
 		const elementName =
 			sourceELementAttributes && sourceELementAttributes["data-name"]?.value;
 
+		rebouldInstanceColorsCss();
 		if (elementName) {
 			const selectedColor = getColorForInstanceId(instanceId);
 			addInstanceIdAsAttribute(instanceId, event.detail.elt);
@@ -49,19 +50,42 @@ function addInstanceIdAsAttribute(instanceId, element) {
 	element.parentElement.setAttribute("data-instance-id", instanceId);
 }
 
-function addSelectedColorToCss(instanceId, selectedColor) {
+function addInstancesIfNotPresent() {
+	document
+		.querySelectorAll("[data-is-instance-list-item]")
+		.forEach((element) => {
+			const instanceId = element.getAttribute("data-instance-id");
+			if (!instanceId) {
+				console.error("Element does not have a instance id", element);
+				return;
+			}
+			const selectedColor = getColorForInstanceId(instanceId);
+			addSelectedColorToCss(instanceId, selectedColor);
+		});
+}
+
+function rebouldInstanceColorsCss() {
 	let instanceStyle = document.getElementById("instance-style");
 	if (!instanceStyle) {
+		console.log("Creating instance style");
 		instanceStyle = document.createElement("style");
 		instanceStyle.id = "instance-style";
 		document.head.appendChild(instanceStyle);
+	} else {
+		console.log("Appending to instance style");
 	}
 
-	instanceStyle.innerHTML += `
-        [data-instance-id="${instanceId}"] {
-            background-color: ${selectedColor};
-        }
-    `;
+	addInstancesIfNotPresent();
+
+	let css = "";
+	for (let [instanceId, color] of assignedColors) {
+		css += `
+            [data-instance-id="${instanceId}"] {
+                background-color: ${color};
+            }
+        `;
+	}
+	instanceStyle.innerHTML = css;
 }
 
 /**
@@ -90,6 +114,7 @@ function getHeader(name, responseXHR) {
 	const header = headers
 		.split("\n")
 		.filter((header) => header.includes(name.toLowerCase()))
+		.map((header) => header.split(":")[1].trim())
 		.join("");
 	return header;
 }
@@ -135,6 +160,7 @@ function getColorForInstanceId(instanceId) {
 	// If all are used, clear the map and try again
 	assignedColors.clear();
 
+	console.warn("All colors are used, clearing map and trying again");
 	document.getElementById("instance-style")?.remove();
 
 	return getColorForInstanceId(instanceId);

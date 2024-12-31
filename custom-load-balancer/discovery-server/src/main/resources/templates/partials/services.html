@@ -46,6 +46,8 @@
     <li
       th:each="serviceInstance: ${instances}"
       class="text-lg mb-2 grid grid-cols-2 border-b border-black"
+      th:data-instance-id="${serviceInstance.instanceId}"
+      data-is-instance-list-item="true"
     >
       <span class="font-semibold">Instance ID:</span>
       <span th:text="${serviceInstance.instanceId}"></span>
