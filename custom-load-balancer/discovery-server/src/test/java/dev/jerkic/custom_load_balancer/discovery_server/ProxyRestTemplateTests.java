@@ -58,6 +58,7 @@ public class ProxyRestTemplateTests {
     // Mock HttpServletRequest behavior
     Mockito.when(httpServletRequest.getRemoteHost()).thenReturn("192.0.0.1");
     Mockito.when(httpServletRequest.getScheme()).thenReturn("http");
+    Mockito.when(httpServletRequest.getHeader(Mockito.any())).thenReturn(null);
 
     // Register a service
     var serviceName = "test-service";
