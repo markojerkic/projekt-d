@@ -12,6 +12,7 @@ import lombok.Data;
 public class ResolvedInstance {
   @NotNull @NotEmpty private String instanceId;
   @NotNull @NotEmpty private String address;
+  @NotNull @NotEmpty private String baseBref;
 
   @NotNull
   @Min(0)

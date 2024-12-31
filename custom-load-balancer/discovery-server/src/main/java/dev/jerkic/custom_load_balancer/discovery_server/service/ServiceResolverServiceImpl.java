@@ -63,6 +63,7 @@ public class ServiceResolverServiceImpl implements ServiceResolverService {
         .address(bestInstance.getServiceInstance().getAddress())
         .isHealthy(bestInstance.getServiceInstance().isHealthy())
         .recordedAt(bestInstance.getLatestTimestamp())
+        .baseBref(bestInstance.getServiceInstance().getServiceModel().getBaseHref())
         .build();
   }
 }
