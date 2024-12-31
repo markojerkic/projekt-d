@@ -1,6 +1,7 @@
 package dev.jerkic.custom_load_balancer.client.configuration;
 
 import dev.jerkic.custom_load_balancer.client.properties.ClientProperties;
+import dev.jerkic.custom_load_balancer.client.service.ActiveRequestsService;
 import dev.jerkic.custom_load_balancer.client.service.ClientHealthService;
 import dev.jerkic.custom_load_balancer.shared.model.dto.HealthUpdateInput;
 import dev.jerkic.custom_load_balancer.shared.model.dto.RegisterInput;
@@ -24,10 +25,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 @EnableConfigurationProperties(ClientProperties.class)
 @Slf4j
 public class DiscoveryServiceConfiguration {
-  // Threshold for threads. If less than 85% of threads are available, service is considered
-  // unhealthy
-  private static final double THREAD_USAGE_THRESHOLD = 0.85;
-  private static final double MEMORY_USAGE_THRESHOLD = 0.90;
+  private final ActiveRequestsService activeRequestsService;
 
   @Value("${server.port}")
   private int serverPort;
@@ -118,7 +116,7 @@ public class DiscoveryServiceConfiguration {
         .serviceName(this.clientProperties.getServiceName())
         .timestamp(Instant.now())
         .isHealthy(true)
-        .numberOfConnections(0l)
+        .numberOfConnections((long) this.activeRequestsService.getActiveRequests())
         .serverPort(String.valueOf(this.serverPort))
         .build();
   }
