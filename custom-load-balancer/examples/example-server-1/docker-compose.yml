@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  example-server-1:
+    build:
+      context: .
+    image: docker.io/markojerkic/example-server-1:latest
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    ports:
+      - "8090:8090"
+    environment:
+      - SERVER_PORT=8090
+      - DISCOVERY_CLIENT_DISCOVERY_SERVER_URL=http://host.docker.internal:8080

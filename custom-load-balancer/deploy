@@ -4,6 +4,11 @@
 ./mvnw clean install -DskipTests
 
 cd ./discovery-server
-docker build -t docker.io/markojerkic/discovery-server .
+docker compose build
 docker push docker.io/markojerkic/discovery-server
-flyctl deploy --remove-only --image docker.io/markojerkic/discovery-server:latest
+
+cd ../examples/example-server-1
+docker build -t docker.io/markojerkic/example-server-1 .
+docker push docker.io/markojerkic/example-server-1
+
+ssh $DISCOVERY_SERVER_USER@$DISCOVERY_SERVER_HOST "docker ps"

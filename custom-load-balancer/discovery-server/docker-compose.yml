@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  discovery-server:
+    build:
+      context: .
+    image: docker.io/markojerkic/discovery-server:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlite:/db/discovery.db
+    volumes:
+      - database:/db
+volumes:
+  database:
