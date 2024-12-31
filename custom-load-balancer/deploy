@@ -3,15 +3,8 @@
 # This script is used to build and deploy the application to Fly.io
 ./mvnw clean install -DskipTests
 
-cd ./discovery-server
 docker compose build
-docker push docker.io/markojerkic/discovery-server
-
-cd ../examples/example-server-1
-docker compose build
-docker push docker.io/markojerkic/example-server-1
-
-cd ../..
+docker compose push
 
 ssh $DISCOVERY_SERVER_USER@$DISCOVERY_SERVER_HOST "mkdir -p ~/projects/projekt-d/discovery-server; \
     mkdir -p ~/projects/projekt-d/example-server-1;"
