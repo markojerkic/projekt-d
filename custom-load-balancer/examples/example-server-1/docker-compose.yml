@@ -6,7 +6,6 @@ services:
     image: docker.io/markojerkic/example-server-1:latest
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
     ports:
       - "8090:8090"
     environment:

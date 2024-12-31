@@ -8,7 +8,20 @@ docker compose build
 docker push docker.io/markojerkic/discovery-server
 
 cd ../examples/example-server-1
-docker build -t docker.io/markojerkic/example-server-1 .
+docker compose build
 docker push docker.io/markojerkic/example-server-1
 
-ssh $DISCOVERY_SERVER_USER@$DISCOVERY_SERVER_HOST "docker ps"
+cd ../..
+
+ssh $DISCOVERY_SERVER_USER@$DISCOVERY_SERVER_HOST "mkdir -p ~/projects/projekt-d/discovery-server; \
+    mkdir -p ~/projects/projekt-d/example-server-1;"
+scp ./discovery-server/docker-compose.yml $DISCOVERY_SERVER_USER@$DISCOVERY_SERVER_HOST:~/projects/projekt-d/discovery-server/
+scp ./examples/example-server-1/docker-compose.yml $DISCOVERY_SERVER_USER@$DISCOVERY_SERVER_HOST:~/projects/projekt-d/example-server-1/
+
+ssh $DISCOVERY_SERVER_USER@$DISCOVERY_SERVER_HOST "cd ~/projects/projekt-d/discovery-server; \
+    docker compose pull; \
+    docker compose up -d --force-recreate; \
+    cd ~/projects/projekt-d/example-server-1; \
+    docker compose pull; \"
+    docker compose up -d --force-recreate; \
+    docker image prune -f;"
