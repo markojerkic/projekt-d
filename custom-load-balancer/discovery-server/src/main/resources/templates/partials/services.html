@@ -81,7 +81,7 @@
   <div
     th:hx-get="@{{baseHref}/test(baseHref=${serviceInfo.baseHref})}"
     data-name="testInstanceFetcher"
-    hx-trigger="every 10s"
+    hx-trigger="revealed delay:1s, every 4s"
     hx-swap="innerHTML"
   ></div>
 </div>

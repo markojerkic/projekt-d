@@ -11,7 +11,8 @@ function updateTimes() {
 }
 
 function watchHtmxTest() {
-	htmx.on("htmx:afterSwap", function (event) {
+	htmx.on("htmx:afterOnLoad", function (event) {
+		console.log("TU sam");
 		/** @type {XMLHttpRequest} */
 		const responseXHR = event.detail.xhr;
 		const instanceId = getHeader("X-Lb-instance", responseXHR);
@@ -24,13 +25,13 @@ function watchHtmxTest() {
 		rebouldInstanceColorsCss();
 		if (elementName) {
 			const selectedColor = getColorForInstanceId(instanceId);
-			addInstanceIdAsAttribute(instanceId, event.detail.elt);
-			addSelectedColorToCss(instanceId, selectedColor);
 			setBackgroundColorForInstance(
 				instanceId,
 				event.detail.elt,
 				selectedColor,
 			);
+			addInstanceIdAsAttribute(instanceId, event.detail.elt);
+			addSelectedColorToCss(instanceId, selectedColor);
 		} else {
 			console.warn("HTMX has swapped elements, but not from test fetcher");
 		}
@@ -191,5 +192,6 @@ function getColorForInstanceId(instanceId) {
 
 window.addEventListener("load", function () {
 	updateTimes();
+	rebouldInstanceColorsCss();
 	watchHtmxTest();
 });
