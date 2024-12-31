@@ -39,7 +39,7 @@ public class ServiceResolverServiceImplTests {
     public HttpServletRequest mockRequest() {
       var request = Mockito.mock(HttpServletRequest.class);
 
-      Mockito.when(request.getRemoteHost()).thenReturn("localhost");
+      Mockito.when(request.getRemoteAddr()).thenReturn("localhost");
       Mockito.when(request.getScheme()).thenReturn("http");
       Mockito.when(request.getHeader(Mockito.any())).thenReturn(null);
 

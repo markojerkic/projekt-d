@@ -56,7 +56,7 @@ public class ProxyRestTemplateTests {
         .andRespond(MockRestResponseCreators.withSuccess(randomResponse, MediaType.TEXT_PLAIN));
 
     // Mock HttpServletRequest behavior
-    Mockito.when(httpServletRequest.getRemoteHost()).thenReturn("192.0.0.1");
+    Mockito.when(httpServletRequest.getRemoteAddr()).thenReturn("192.0.0.1");
     Mockito.when(httpServletRequest.getScheme()).thenReturn("http");
     Mockito.when(httpServletRequest.getHeader(Mockito.any())).thenReturn(null);
 

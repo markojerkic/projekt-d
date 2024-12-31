@@ -148,7 +148,7 @@ public class ServiceManagement implements ServiceHealthService {
 
     // 4. Finally fallback to remote address if nothing else works
     if (clientIp == null || clientIp.isEmpty()) {
-      clientIp = this.request.getRemoteHost();
+      clientIp = this.request.getRemoteAddr();
     }
 
     if (!this.isPublicIp(clientIp)) {
