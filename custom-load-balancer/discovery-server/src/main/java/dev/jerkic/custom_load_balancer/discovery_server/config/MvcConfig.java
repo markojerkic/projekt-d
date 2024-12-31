@@ -12,6 +12,7 @@ public class MvcConfig implements WebMvcConfigurer {
 
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
     registry.addResourceHandler("/assets/**").addResourceLocations("classpath:/static/");
   }
 }
