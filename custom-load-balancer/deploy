@@ -15,6 +15,6 @@ ssh $DISCOVERY_SERVER_USER@$DISCOVERY_SERVER_HOST "cd ~/projects/projekt-d/disco
     docker compose pull; \
     docker compose up -d --force-recreate; \
     cd ~/projects/projekt-d/example-server-1; \
-    docker compose pull; \"
+    docker compose pull; \
     docker compose up -d --force-recreate; \
     docker image prune -f;"
