@@ -41,7 +41,7 @@ proxy:
 
   # Hostport of your application - replace 8081 with whatever port
   # your application is listening on!
-  target: "localhost:8080"
+  target: "localhost:8081"
 
   # Filename of the SQLite database you want to use for TXID tracking.
   db: "discovery.db"
