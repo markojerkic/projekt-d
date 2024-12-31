@@ -151,6 +151,11 @@ public class ServiceManagement implements ServiceHealthService {
       clientIp = this.request.getRemoteAddr();
     }
 
+    log.info("Client IP from Fly-Client-IP: {}", this.request.getHeader("Fly-Client-IP"));
+    log.info("Client IP from X-Forwarded-For: {}", this.request.getHeader("X-Forwarded-For"));
+    log.info("Client IP from X-Real-IP: {}", this.request.getHeader("X-Real-IP"));
+    log.info("Client IP from RemoteAddr: {}", this.request.getRemoteAddr());
+
     if (!this.isPublicIp(clientIp)) {
       log.warn("IP address: {} does not seem to be a public IP address", clientIp);
     }
