@@ -91,8 +91,9 @@ public class ServiceManagementTests {
     var instanceId2 = this.serviceManagement.registerService(registerInput);
     assertNotEquals(instanceId, instanceId2);
 
+    assertEquals(instanceId, instanceId2);
     assertEquals(1, this.serviceModelRepository.count());
-    assertEquals(2, this.serviceInstanceRepository.count());
+    assertEquals(1, this.serviceInstanceRepository.count());
   }
 
   @Test
@@ -161,33 +162,41 @@ public class ServiceManagementTests {
   public void testMultipleInstances() {
     // Register
     var serviceName = "test-service";
-    var initialHealth = this.getServiceHealth("8090", true, serviceName);
-    var registerInput =
+
+    var initialHealth1 = this.getServiceHealth("8090", true, serviceName);
+    var registerInput1 =
         RegisterInput.builder()
             .serviceInfo(this.getServiceInfo(serviceName))
-            .serviceHealth(initialHealth)
+            .serviceHealth(initialHealth1)
             .build();
 
-    var instanceId1 = this.serviceManagement.registerService(registerInput);
-    var instanceId2 = this.serviceManagement.registerService(registerInput);
+    var instanceId12 = this.serviceManagement.registerService(registerInput1);
+
+    var initialHealth2 = this.getServiceHealth("8091", true, serviceName);
+    var registerInput2 =
+        RegisterInput.builder()
+            .serviceInfo(this.getServiceInfo(serviceName))
+            .serviceHealth(initialHealth2)
+            .build();
+    var instanceId2 = this.serviceManagement.registerService(registerInput2);
 
     var healthUpdate1 = this.getServiceHealth("8090", true, serviceName);
     this.serviceManagement.updateHealth(
         HealthUpdateInput.builder()
-            .instanceId(instanceId1)
+            .instanceId(instanceId12)
             .serviceName(healthUpdate1.getServiceName())
             .health(healthUpdate1)
             .build());
 
-    var healthUpdate2 = this.getServiceHealth("8090", true, serviceName);
+    var healthUpdate2 = this.getServiceHealth("8091", true, serviceName);
     this.serviceManagement.updateHealth(
         HealthUpdateInput.builder()
-            .instanceId(instanceId1)
+            .instanceId(instanceId12)
             .serviceName(healthUpdate2.getServiceName())
             .health(healthUpdate2)
             .build());
 
-    var healthUpdate3 = this.getServiceHealth("8090", true, serviceName);
+    var healthUpdate3 = this.getServiceHealth("8091", true, serviceName);
     this.serviceManagement.updateHealth(
         HealthUpdateInput.builder()
             .instanceId(instanceId2)
@@ -197,7 +206,7 @@ public class ServiceManagementTests {
 
     var serviceModel =
         this.serviceInstanceRepository
-            .findFirstByInstanceId(instanceId1)
+            .findFirstByInstanceId(instanceId12)
             .map(ServiceInstance::getServiceModel)
             .get();
 
@@ -207,7 +216,7 @@ public class ServiceManagementTests {
     assertEquals(2, serviceInstances.size());
     var instance1 =
         serviceInstances.stream()
-            .filter(instance -> instance.getInstanceId().equals(instanceId1))
+            .filter(instance -> instance.getInstanceId().equals(instanceId12))
             .findFirst()
             .get();
     var instance2 =

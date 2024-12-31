@@ -183,7 +183,7 @@ public class ServiceResolverServiceImplTests {
     var registerInput1 =
         RegisterInput.builder()
             .serviceInfo(this.getServiceInfo(serviceName))
-            .serviceHealth(this.getServiceHealth("8070", true, serviceName))
+            .serviceHealth(this.getServiceHealth("8090", true, serviceName))
             .build();
     registerInput1.getServiceHealth().setNumberOfConnections(1l);
     registerInput1.getServiceHealth().setTimestamp(instanceInputTime);
