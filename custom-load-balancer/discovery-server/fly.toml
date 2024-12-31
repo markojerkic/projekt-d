@@ -13,11 +13,11 @@ primary_region = 'otp'
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   processes = ['app']
 
 [[vm]]
-  size = 'shared-cpu-2x'
+  size = 'shared-cpu-4x'
 
 [mounts]
   source = "litefs"
