@@ -5,5 +5,7 @@ import org.springframework.data.domain.Sort.Order;
 
 public class Constants {
   public static Sort SORT_INSTANCE =
+      Sort.by(Order.desc("instanceRecordedAt"), Order.asc("activeHttpRequests"));
+  public static Sort SORT_BEST_INSTANCE =
       Sort.by(Order.desc("latestTimestamp"), Order.asc("serviceInstance.activeHttpRequests"));
 }

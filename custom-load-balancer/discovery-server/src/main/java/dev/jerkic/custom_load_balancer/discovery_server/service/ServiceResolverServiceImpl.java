@@ -24,7 +24,7 @@ public class ServiceResolverServiceImpl implements ServiceResolverService {
   @Override
   public List<ResolvedInstance> resolveService(String serviceName) {
     return this.bestInstanceRepository
-        .findAll(this.getBestInstanceSpecification(serviceName), Constants.SORT_INSTANCE)
+        .findAll(this.getBestInstanceSpecification(serviceName), Constants.SORT_BEST_INSTANCE)
         .stream()
         .map(this::mapToResolvedInstance)
         .collect(Collectors.toList());
@@ -38,7 +38,9 @@ public class ServiceResolverServiceImpl implements ServiceResolverService {
   }
 
   public List<ResolvedInstance> resolveServiceForServiceId(String serviceId) {
-    return this.bestInstanceRepository.findByServiceId(serviceId, Constants.SORT_INSTANCE).stream()
+    return this.bestInstanceRepository
+        .findByServiceId(serviceId, Constants.SORT_BEST_INSTANCE)
+        .stream()
         .map(this::mapToResolvedInstance)
         .collect(Collectors.toList());
   }
