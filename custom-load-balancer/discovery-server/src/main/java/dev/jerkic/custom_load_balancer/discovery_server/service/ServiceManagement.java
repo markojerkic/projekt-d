@@ -124,21 +124,14 @@ public class ServiceManagement implements ServiceHealthService {
   }
 
   private String buildInstanceAddress(String port) {
-    // Get the first IP from X-Forwarded-For header if present
-    String remoteHost = this.request.getHeader("X-Forwarded-For");
-    if (remoteHost != null && !remoteHost.isEmpty()) {
-      // Split by comma and get the first IP (original client IP)
-      remoteHost = remoteHost.split("\\s*,\\s*")[0];
-    } else {
+    // Get the first IP from Fly-Client-IP header if present
+    var remoteHost = this.request.getHeader("Fly-Client-IP");
+    if (remoteHost == null || !remoteHost.isEmpty()) {
       // Fallback to remote host if X-Forwarded-For is not present
       remoteHost = this.request.getRemoteHost();
     }
 
-    // Check for X-Forwarded-Proto header for the protocol
-    String protocol = this.request.getHeader("X-Forwarded-Proto");
-    if (protocol == null || protocol.isEmpty()) {
-      protocol = this.request.getScheme();
-    }
+    var protocol = this.request.getScheme();
 
     // Remove any surrounding brackets from IPv6 addresses
     remoteHost = remoteHost.replaceAll("[\\[\\]]", "");
