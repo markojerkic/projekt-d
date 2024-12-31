@@ -63,33 +63,7 @@ public class ServiceManagement implements ServiceHealthService {
         .findFirst()
         .map(ServiceInstance::getServiceModel)
         .map(ServiceModel::getId)
-        .orElseGet(
-            () -> {
-              var instance =
-                  ServiceInstance.builder()
-                      .entryId(UUID.randomUUID().toString())
-                      .instanceId(UUID.randomUUID().toString())
-                      // empty shell only containing PK for JPA to connect them
-                      .serviceModel(serviceModel)
-                      .isHealthy(registerInput.getServiceHealth().isHealthy())
-                      .instanceRecordedAt(
-                          Date.from(registerInput.getServiceHealth().getTimestamp()))
-                      .address(resolvedAddr)
-                      .activeHttpRequests(registerInput.getServiceHealth().getNumberOfConnections())
-                      .build();
-
-              return this.serviceInstanceRepository.save(instance).getInstanceId().toString();
-            });
-  }
-
-  @SuppressWarnings("unused")
-  private Specification<ServiceInstance> findByServiceIdAddress(String serviceId, String address) {
-    return (root, query, criteriaBuilder) -> {
-      var serviceModelJoin = root.join("serviceModel");
-      return criteriaBuilder.and(
-          criteriaBuilder.equal(serviceModelJoin.get("id"), serviceId),
-          criteriaBuilder.equal(root.get("address"), address));
-    };
+        .orElseGet(() -> getHealthForRegistration(registerInput, serviceModel, resolvedAddr));
   }
 
   @Transactional
@@ -205,5 +179,31 @@ public class ServiceManagement implements ServiceHealthService {
       log.error("Error validating IP address", e);
       return false;
     }
+  }
+
+  private String getHealthForRegistration(
+      RegisterInput registerInput, ServiceModel serviceModel, String resolvedAddr) {
+    var instance =
+        ServiceInstance.builder()
+            .entryId(UUID.randomUUID().toString())
+            .instanceId(UUID.randomUUID().toString())
+            .serviceModel(serviceModel)
+            .isHealthy(registerInput.getServiceHealth().isHealthy())
+            .instanceRecordedAt(Date.from(registerInput.getServiceHealth().getTimestamp()))
+            .address(resolvedAddr)
+            .activeHttpRequests(registerInput.getServiceHealth().getNumberOfConnections())
+            .build();
+
+    return this.serviceInstanceRepository.save(instance).getInstanceId().toString();
+  }
+
+  @SuppressWarnings("unused")
+  private Specification<ServiceInstance> findByServiceIdAddress(String serviceId, String address) {
+    return (root, query, criteriaBuilder) -> {
+      var serviceModelJoin = root.join("serviceModel");
+      return criteriaBuilder.and(
+          criteriaBuilder.equal(serviceModelJoin.get("id"), serviceId),
+          criteriaBuilder.equal(root.get("address"), address));
+    };
   }
 }

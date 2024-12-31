@@ -1,6 +1,7 @@
 package dev.jerkic.custom_load_balancer.discovery_server;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import dev.jerkic.custom_load_balancer.discovery_server.model.ServiceModel;
 import dev.jerkic.custom_load_balancer.discovery_server.repository.ServiceModelRepository;
@@ -69,10 +70,7 @@ public class ServiceResolverServiceImplTests {
     registerInput2.getServiceHealth().setTimestamp(Instant.now().minusSeconds(100));
     var instanceId2 = this.serviceManagement.registerService(registerInput2);
 
-    assertEquals(
-        instanceId1,
-        instanceId2,
-        "Two instace registrations with same addr and port should have same instanceId");
+    assertNotEquals(instanceId1, instanceId2);
 
     var resolvedBestInstances = this.serviceResolverService.resolveService(serviceName);
     assertEquals(

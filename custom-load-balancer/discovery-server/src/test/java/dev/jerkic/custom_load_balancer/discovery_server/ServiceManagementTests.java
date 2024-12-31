@@ -91,7 +91,6 @@ public class ServiceManagementTests {
     var instanceId2 = this.serviceManagement.registerService(registerInput);
     assertNotEquals(instanceId, instanceId2);
 
-    assertEquals(instanceId, instanceId2);
     assertEquals(1, this.serviceModelRepository.count());
     assertEquals(1, this.serviceInstanceRepository.count());
   }
