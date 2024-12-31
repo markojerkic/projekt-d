@@ -53,7 +53,9 @@
       <span th:text="${serviceInstance.instanceId}"></span>
 
       <span class="font-semibold">Timestamp:</span>
+      <!-- Raw date unix timestamp in data-time-->
       <time
+        th:data-time="${#dates.formatISO(serviceInstance.recordedAt)}"
         th:text="${#dates.format(serviceInstance.recordedAt, 'yyyy-MM-dd HH:mm:ss')}"
       ></time>
 

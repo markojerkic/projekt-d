@@ -1,15 +1,3 @@
-// watch for changes in the dom
-// for each <time /> element, read the datetime attribute
-// and update the innerHTML with the formatted date
-
-function updateTimes() {
-	var times = document.querySelectorAll("time");
-	for (var i = 0; i < times.length; i++) {
-		var time = times[i];
-		time.innerHTML = new Date(time.getAttribute("datetime")).toLocaleString();
-	}
-}
-
 function watchHtmxTest() {
 	htmx.on("htmx:afterOnLoad", function (event) {
 		/** @type {XMLHttpRequest} */
@@ -41,7 +29,21 @@ function watchHtmxTest() {
 		} else {
 			console.warn("HTMX has swapped elements, but not from test fetcher");
 		}
+		formatDates();
 	});
+}
+
+/**
+ * After swap, get all time elemnts with data-time and format the date
+ */
+function formatDates() {
+	const dates = document.querySelectorAll("time[data-time]");
+	for (const dateElement of dates) {
+		const time = dateElement.getAttribute("data-time");
+		if (time) {
+			dateElement.innerHTML = new Date(time).toLocaleString();
+		}
+	}
 }
 
 /**
@@ -197,7 +199,6 @@ function getColorForInstanceId(instanceId) {
 }
 
 window.addEventListener("load", function () {
-	updateTimes();
 	rebouldInstanceColorsCss();
 	watchHtmxTest();
 });
