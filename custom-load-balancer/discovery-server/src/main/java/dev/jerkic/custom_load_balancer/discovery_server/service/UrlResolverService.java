@@ -16,21 +16,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class LoadBalancingService {
+public class UrlResolverService {
   private final ServiceModelRepository serviceModelRepository;
   private final ServiceResolverServiceImpl serviceResolverService;
   private final JdbcTemplate jdbcTemplate;
-
-  // FIXME: move to seperate service, or just inject restTempltee in proxy conrtoller
-  // public ResponseEntity<?> proxyRequest(HttpServletRequest request) {
-  //  var requestedPath = request.getRequestURI();
-  //  var bestInstance = this.findBestInstanceForBaseHref(requestedPath);
-  //  if (bestInstance.isEmpty()) {
-  //    return ResponseEntity.notFound().build();
-  //  }
-  //
-  //  return ResponseEntity.ok("Nema još ništa");
-  // }
 
   public Optional<ResolvedInstance> findBestInstanceForBaseHref(String requestedUri) {
     var baseHref = this.getBaseHrefFromURI(requestedUri);
