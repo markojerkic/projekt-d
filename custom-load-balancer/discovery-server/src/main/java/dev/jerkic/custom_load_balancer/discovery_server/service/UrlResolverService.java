@@ -6,6 +6,8 @@ import dev.jerkic.custom_load_balancer.shared.model.dto.ResolvedInstance;
 import jakarta.transaction.Transactional;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,36 +23,26 @@ public class UrlResolverService {
   private final ServiceResolverServiceImpl serviceResolverService;
   private final JdbcTemplate jdbcTemplate;
 
-  public Optional<ResolvedInstance> findBestInstanceForBaseHref(String requestedUri) {
-    var baseHref = this.getBaseHrefFromURI(requestedUri);
-    log.debug("Base href for uri {}: {}", requestedUri, baseHref);
-    if (baseHref == null) return Optional.empty();
+  public List<ResolvedInstance> resolveForBaseHref(String baseHref) {
 
     var service = this.serviceModelRepository.findByBaseHref(baseHref);
     if (service.isEmpty()) {
-      return Optional.empty();
+      return Collections.emptyList();
     }
 
     var bestInstances =
         this.serviceResolverService.resolveServiceForServiceId(
             service.map(ServiceModel::getId).get());
 
-    var bestInstance = bestInstances.stream().findFirst();
-    if (bestInstance.isPresent()) {
-      log.info("Incrementing active requests");
-      this.incrementActiveRequests(bestInstance.get());
-    }
-
-    return bestInstance;
+    return bestInstances;
   }
 
-  private void incrementActiveRequests(ResolvedInstance instance) {
-    this.jdbcTemplate.update(
-        """
-        UPDATE service_instance SET active_http_requests = active_http_requests + 1 WHERE
-             instance_id = ?;
-        """,
-        instance.getInstanceId());
+  public Optional<ResolvedInstance> findBestInstanceForBaseHref(String requestedUri) {
+    var baseHref = this.getBaseHrefFromURI(requestedUri);
+    log.debug("Base href for uri {}: {}", requestedUri, baseHref);
+    if (baseHref == null) return Optional.empty();
+
+    return this.resolveForBaseHref(baseHref).stream().findFirst();
   }
 
   private String getBaseHrefFromURI(String requestedUri) {

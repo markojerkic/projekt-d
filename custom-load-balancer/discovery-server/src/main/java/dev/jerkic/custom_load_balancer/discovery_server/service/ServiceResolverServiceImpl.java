@@ -20,6 +20,12 @@ import org.springframework.stereotype.Service;
 @Transactional
 public class ServiceResolverServiceImpl implements ServiceResolverService {
   private final BestInstanceRepository bestInstanceRepository;
+  private final UrlResolverService urlResolverService;
+
+  @Override
+  public List<ResolvedInstance> resolveForBaseHref(String baseHref) {
+    return this.urlResolverService.resolveForBaseHref(baseHref);
+  }
 
   @Override
   public List<ResolvedInstance> resolveService(String serviceName) {
