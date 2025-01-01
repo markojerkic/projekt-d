@@ -1,6 +1,6 @@
 package dev.jerkic.custom_load_balancer.discovery_server.config;
 
-import dev.jerkic.custom_load_balancer.discovery_server.service.LoadBalancingService;
+import dev.jerkic.custom_load_balancer.discovery_server.service.UrlResolverService;
 import dev.jerkic.custom_load_balancer.discovery_server.service.http.LoadBalancingHttpRequestInterceptor;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,7 @@ import org.springframework.web.client.RestTemplate;
 public class ProxyRestTemplate extends RestTemplate {
 
   @Autowired
-  public ProxyRestTemplate(LoadBalancingService loadBalancingService) {
+  public ProxyRestTemplate(UrlResolverService loadBalancingService) {
     super();
     this.setInterceptors(List.of(new LoadBalancingHttpRequestInterceptor(loadBalancingService)));
   }

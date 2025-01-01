@@ -7,5 +7,7 @@ import java.util.Optional;
 public interface ServiceResolverService {
   List<ResolvedInstance> resolveService(String serviceName);
 
+  List<ResolvedInstance> resolveForBaseHref(String baseHref);
+
   Optional<ResolvedInstance> resolveBestInstance(String serviceName);
 }
