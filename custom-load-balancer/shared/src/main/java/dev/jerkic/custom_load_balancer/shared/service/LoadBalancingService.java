@@ -27,12 +27,16 @@ public class LoadBalancingService {
       return Optional.empty();
     }
 
-    this.cache.computeIfAbsent(baseHref, this::fillCacheForBaseHref);
+    var instances = this.cache.computeIfAbsent(baseHref, this::fillCacheForBaseHref);
 
-    var bestInstance = this.serviceResolverService.resolveBestInstance(requestedUri);
+    var bestInstance = instances.poll();
+    if (bestInstance == null) {
+      log.error("No instances found for base href {}", baseHref);
+      return Optional.empty();
+    }
+    bestInstance.incrementActiveRequests();
 
-    // return bestInstance.map(ResolvedInstance::getAddress).orElse(null);
-    return Optional.empty();
+    return Optional.of(bestInstance.getInstance().getAddress());
   }
 
   @Scheduled(fixedRate = 10_000)
