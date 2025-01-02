@@ -42,12 +42,14 @@ public class LoadBalancingService {
             bestInstance.getInstance().getAddress(), bestInstance.getInstance().getInstanceId()));
   }
 
-  @Scheduled(fixedRate = 10_000)
-  public void updateCache() {
+  @Scheduled(fixedRate = 20_000)
+  public void clearingCache() {
+    log.info("Clearing cache");
     this.cache.clear();
   }
 
   private PriorityQueue<UsedResolvedInstance> fillCacheForBaseHref(String baseHref) {
+    log.info("Filling cache for base href {}", baseHref);
     var resolvedInstanecs = this.serviceResolverService.resolveForBaseHref(baseHref);
     var queue = new PriorityQueue<UsedResolvedInstance>();
     queue.addAll(resolvedInstanecs.stream().map(UsedResolvedInstance::new).toList());
