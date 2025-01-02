@@ -75,7 +75,7 @@
 
 <div
   class="relative p-4 border rounded-md"
-  th:fragment="testResourceFetcher"
+  th:fragment="testResourceFetcher(url)"
   th:object="${serviceInfo}"
   hx-indicator="#instanceIndicaftor"
 >
@@ -98,15 +98,15 @@
     Fetching
     <i
       class="font-semibold"
-      th:text="@{/{instance}/test(instance=${serviceInfo.serviceName})}"
+      th:text="@{/{instance}{url}(instance=${serviceInfo.serviceName}, url=${url})}"
     ></i>
     for testing
   </h2>
 
   <div
-    th:hx-get="@{{baseHref}/test(baseHref=${serviceInfo.baseHref})}"
+    th:hx-get="@{{baseHref}{url}(baseHref=${serviceInfo.baseHref}, url=${url})}"
     data-name="testInstanceFetcher"
-    hx-trigger="revealed delay:1s, every 4s"
+    hx-trigger="revealed delay:1s, every 2s"
     hx-swap="innerHTML"
   ></div>
 </div>

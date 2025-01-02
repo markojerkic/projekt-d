@@ -7,19 +7,17 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class ActiveRequestsService {
-  private AtomicInteger activeRequests = new AtomicInteger(0);
+  private static final AtomicInteger activeRequests = new AtomicInteger(0);
 
   public void incrementActiveRequests() {
-    var curr = this.activeRequests.incrementAndGet();
-    log.info("Incremented active requests. Current number of requests: {}", curr);
+    activeRequests.incrementAndGet();
   }
 
   public void decrementActiveRequests() {
-    var curr = this.activeRequests.decrementAndGet();
-    log.info("Decremented active requests. Current number of requests: {}", curr);
+    activeRequests.decrementAndGet();
   }
 
   public int getActiveRequests() {
-    return this.activeRequests.get();
+    return activeRequests.get();
   }
 }

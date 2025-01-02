@@ -22,11 +22,10 @@ public class ActiveRequestsFilter implements Filter {
 
     try {
       chain.doFilter(request, response);
-      this.activeRequestsService.decrementActiveRequests();
     } catch (Exception e) {
-
-      this.activeRequestsService.decrementActiveRequests();
       throw e;
+    } finally {
+      this.activeRequestsService.decrementActiveRequests();
     }
   }
 }

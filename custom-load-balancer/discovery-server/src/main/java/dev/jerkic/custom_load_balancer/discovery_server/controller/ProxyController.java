@@ -20,8 +20,7 @@ public class ProxyController {
   public ResponseEntity<?> proxy(HttpServletRequest request) throws IOException {
     var requestedPath = request.getRequestURI();
 
-    log.info("Requested path: {}", requestedPath);
-    log.info("Request: {}", request.getRequestURI());
+    log.debug("Requested path: {}", requestedPath);
 
     var requestEntity = RequestEntityConverter.fromHttpServletRequest(request);
     return this.restTemplate.exchange(requestEntity, String.class);
