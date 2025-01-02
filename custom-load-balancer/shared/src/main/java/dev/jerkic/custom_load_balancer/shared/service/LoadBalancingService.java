@@ -36,7 +36,6 @@ public class LoadBalancingService {
 
     lock.lock();
     try {
-
       var bestInstance = instances.poll();
       if (bestInstance == null) {
         log.error("No instances found for base href {}", baseHref);
