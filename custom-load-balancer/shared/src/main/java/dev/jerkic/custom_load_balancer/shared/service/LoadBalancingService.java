@@ -1,5 +1,6 @@
 package dev.jerkic.custom_load_balancer.shared.service;
 
+import dev.jerkic.custom_load_balancer.shared.model.InstaceUriWithId;
 import dev.jerkic.custom_load_balancer.shared.model.UsedResolvedInstance;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,7 +21,7 @@ public class LoadBalancingService {
   private final ConcurrentHashMap<String, PriorityQueue<UsedResolvedInstance>> cache =
       new ConcurrentHashMap<>();
 
-  public Optional<String> getBestInstanceForBaseHref(String requestedUri) {
+  public Optional<InstaceUriWithId> getBestInstanceForBaseHref(String requestedUri) {
     var baseHref = this.getBaseHrefFromURI(requestedUri);
     if (baseHref == null) {
       log.error("No base href foudn for uri {}", requestedUri);
@@ -36,7 +37,9 @@ public class LoadBalancingService {
     }
     bestInstance.incrementActiveRequests();
 
-    return Optional.of(bestInstance.getInstance().getAddress());
+    return Optional.of(
+        new InstaceUriWithId(
+            bestInstance.getInstance().getAddress(), bestInstance.getInstance().getInstanceId()));
   }
 
   @Scheduled(fixedRate = 10_000)

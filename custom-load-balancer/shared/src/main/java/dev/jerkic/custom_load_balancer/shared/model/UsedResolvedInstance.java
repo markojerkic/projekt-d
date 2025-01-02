@@ -19,6 +19,7 @@ public class UsedResolvedInstance {
   public void incrementActiveRequests() {
     this.lock.lock();
     try {
+      this.usedAt = Instant.now();
       this.instance.setActiveRequests(this.instance.getActiveRequests() + 1);
     } finally {
       this.lock.unlock();

@@ -1,8 +1,7 @@
 package dev.jerkic.custom_load_balancer.discovery_server.service.http;
 
 import dev.jerkic.custom_load_balancer.discovery_server.exceptions.NoInstanceFoundException;
-import dev.jerkic.custom_load_balancer.shared.model.dto.ResolvedInstance;
-import dev.jerkic.custom_load_balancer.shared.service.ServiceResolverService;
+import dev.jerkic.custom_load_balancer.shared.service.LoadBalancingService;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -16,22 +15,21 @@ import org.springframework.http.client.ClientHttpResponse;
 @RequiredArgsConstructor
 @Slf4j
 public class LoadBalancingHttpRequestInterceptor implements ClientHttpRequestInterceptor {
-
-  private final ServiceResolverService serviceResolverService;
+  private final LoadBalancingService loadBalancingService;
 
   @Override
   public ClientHttpResponse intercept(
       HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
 
     var bestInstance =
-        this.serviceResolverService.resolveBestInstanceForBaseHref(request.getURI().toString());
+        this.loadBalancingService.getBestInstanceForBaseHref(request.getURI().toString());
 
     if (bestInstance.isEmpty()) {
       throw new NoInstanceFoundException(
           "No instance found for the given base href " + request.getURI());
     }
 
-    var uri = this.getProxiedUriFromOriginal(bestInstance.get(), request);
+    var uri = this.getProxiedUriFromOriginal(bestInstance.get().uri(), request);
 
     HttpRequest newRequest =
         new HttpRequestImplementation(
@@ -46,17 +44,17 @@ public class LoadBalancingHttpRequestInterceptor implements ClientHttpRequestInt
     responseHeaders.add("X-Load-balanded", "true");
     bestInstance.ifPresent(
         instance -> {
-          responseHeaders.add("X-LB-instance", instance.getInstanceId());
+          responseHeaders.add("X-LB-instance", instance.instanceId());
         });
 
     return result;
   }
 
-  private URI getProxiedUriFromOriginal(ResolvedInstance bestInstance, HttpRequest request) {
+  private URI getProxiedUriFromOriginal(String bestInstanceUri, HttpRequest request) {
     try {
       var query = request.getURI().getQuery() == null ? "" : "?" + request.getURI().getQuery();
 
-      var realRequestUri = bestInstance.getAddress() + request.getURI().getPath() + query;
+      var realRequestUri = bestInstanceUri + request.getURI().getPath() + query;
       log.info("Sending request to {}", realRequestUri);
       return new URI(realRequestUri);
     } catch (URISyntaxException e) {
