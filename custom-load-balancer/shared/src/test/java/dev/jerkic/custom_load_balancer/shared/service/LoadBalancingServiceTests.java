@@ -90,7 +90,6 @@ public class LoadBalancingServiceTests {
           });
     }
 
-    System.out.println("TU sam");
     assertTrue(countDownLatch.await(10, java.util.concurrent.TimeUnit.SECONDS));
   }
 }

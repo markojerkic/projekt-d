@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,6 +21,7 @@ public class LoadBalancingService {
 
   private final ConcurrentHashMap<String, PriorityQueue<UsedResolvedInstance>> cache =
       new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, ReentrantLock> locks = new ConcurrentHashMap<>();
 
   public Optional<InstaceUriWithId> getBestInstanceForBaseHref(String requestedUri) {
     var baseHref = this.getBaseHrefFromURI(requestedUri);
@@ -29,23 +31,37 @@ public class LoadBalancingService {
     }
 
     var instances = this.cache.computeIfAbsent(baseHref, this::fillCacheForBaseHref);
+    @SuppressWarnings("unused")
+    var lock = this.locks.computeIfAbsent(baseHref, k -> new ReentrantLock());
 
-    var bestInstance = instances.peek();
-    if (bestInstance == null) {
-      log.error("No instances found for base href {}", baseHref);
-      return Optional.empty();
+    lock.lock();
+    try {
+
+      var bestInstance = instances.poll();
+      if (bestInstance == null) {
+        log.error("No instances found for base href {}", baseHref);
+        return Optional.empty();
+      }
+      bestInstance.incrementActiveRequests();
+      instances.add(bestInstance);
+      return Optional.of(
+          new InstaceUriWithId(
+              bestInstance.getInstance().getAddress(), bestInstance.getInstance().getInstanceId()));
+    } finally {
+      lock.unlock();
     }
-    bestInstance.incrementActiveRequests();
-
-    return Optional.of(
-        new InstaceUriWithId(
-            bestInstance.getInstance().getAddress(), bestInstance.getInstance().getInstanceId()));
   }
 
-  @Scheduled(fixedRate = 20_000)
-  public void clearingCache() {
+  @Scheduled(fixedRate = 10_000)
+  public void clearCache() {
     log.info("Clearing cache");
     this.cache.clear();
+  }
+
+  @Scheduled(fixedRate = 300_000)
+  public void clearLocks() {
+    log.info("Clearing locks");
+    this.locks.clear();
   }
 
   private PriorityQueue<UsedResolvedInstance> fillCacheForBaseHref(String baseHref) {
