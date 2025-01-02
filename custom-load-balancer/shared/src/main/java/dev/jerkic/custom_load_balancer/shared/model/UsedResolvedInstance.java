@@ -1,12 +1,13 @@
 package dev.jerkic.custom_load_balancer.shared.model;
 
 import dev.jerkic.custom_load_balancer.shared.model.dto.ResolvedInstance;
+import dev.jerkic.custom_load_balancer.shared.util.ResolvedInstanceComparator;
 import java.time.Instant;
 import java.util.concurrent.locks.ReentrantLock;
 import lombok.Data;
 
 @Data
-public class UsedResolvedInstance {
+public class UsedResolvedInstance implements Comparable<UsedResolvedInstance> {
   private ResolvedInstance instance;
   private Instant usedAt;
   private final ReentrantLock lock = new ReentrantLock();
@@ -33,5 +34,10 @@ public class UsedResolvedInstance {
     } finally {
       this.lock.unlock();
     }
+  }
+
+  @Override
+  public int compareTo(UsedResolvedInstance o) {
+    return new ResolvedInstanceComparator().compare(this, (UsedResolvedInstance) o);
   }
 }

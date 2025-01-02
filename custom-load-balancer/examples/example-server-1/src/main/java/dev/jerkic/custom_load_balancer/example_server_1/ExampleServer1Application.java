@@ -5,8 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(
     scanBasePackages = {
-      "dev.jerkic.custom_load_balancer.example_server_1",
-      "dev.jerkic.custom_load_balancer.client"
+      "dev.jerkic.custom_load_balancer",
     })
 public class ExampleServer1Application {
 

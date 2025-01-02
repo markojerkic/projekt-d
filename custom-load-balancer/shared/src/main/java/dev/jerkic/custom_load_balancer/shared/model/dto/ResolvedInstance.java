@@ -16,7 +16,8 @@ public class ResolvedInstance {
 
   @NotNull
   @Min(0)
-  private Long activeRequests;
+  @Builder.Default
+  private Long activeRequests = 0l;
 
   @NotNull private Boolean isHealthy;
   @NotNull private Date recordedAt;
