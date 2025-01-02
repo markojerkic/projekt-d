@@ -13,7 +13,23 @@
 
     <div class="grid gap-2 grid-cols-1 md:grid-cols-2">
       <div th:replace="~{partials/services.html :: serviceDetail}"></div>
-      <div th:replace="~{partials/services.html :: testResourceFetcher}"></div>
+      <div class="flex flex-col gap-2">
+        <div
+          th:replace="~{partials/services.html :: testResourceFetcher}"
+        ></div>
+        <div
+          th:replace="~{partials/services.html :: testResourceFetcher}"
+        ></div>
+        <div
+          th:replace="~{partials/services.html :: testResourceFetcher}"
+        ></div>
+        <div
+          th:replace="~{partials/services.html :: testResourceFetcher}"
+        ></div>
+        <div
+          th:replace="~{partials/services.html :: testResourceFetcher}"
+        ></div>
+      </div>
     </div>
   </body>
 </html>
