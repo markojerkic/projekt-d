@@ -84,8 +84,8 @@ public class ServiceResolverServiceImplTests {
     var bestInstance = this.serviceResolverService.resolveBestInstance(serviceName);
     assertEquals(instanceId1, bestInstance.get().getInstanceId());
     assertEquals(
-        registerInput1.getServiceHealth().getTimestamp(),
-        bestInstance.get().getRecordedAt().toInstant());
+        registerInput1.getServiceHealth().getTimestamp().toEpochMilli(),
+        bestInstance.get().getRecordedAt().getTime());
   }
 
   @Test
