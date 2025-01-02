@@ -1,8 +1,8 @@
 package dev.jerkic.custom_load_balancer.discovery_server.service.http;
 
 import dev.jerkic.custom_load_balancer.discovery_server.exceptions.NoInstanceFoundException;
-import dev.jerkic.custom_load_balancer.discovery_server.service.UrlResolverService;
 import dev.jerkic.custom_load_balancer.shared.model.dto.ResolvedInstance;
+import dev.jerkic.custom_load_balancer.shared.service.ServiceResolverService;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -17,14 +17,15 @@ import org.springframework.http.client.ClientHttpResponse;
 @Slf4j
 public class LoadBalancingHttpRequestInterceptor implements ClientHttpRequestInterceptor {
 
-  private final UrlResolverService urlResolverService;
+  private final ServiceResolverService serviceResolverService;
 
   @Override
   public ClientHttpResponse intercept(
       HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
 
     var bestInstance =
-        this.urlResolverService.findBestInstanceForBaseHref(request.getURI().toString());
+        this.serviceResolverService.resolveBestInstanceForBaseHref(request.getURI().toString());
+
     if (bestInstance.isEmpty()) {
       throw new NoInstanceFoundException(
           "No instance found for the given base href " + request.getURI());

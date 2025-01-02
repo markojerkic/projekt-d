@@ -10,4 +10,6 @@ public interface ServiceResolverService {
   List<ResolvedInstance> resolveForBaseHref(String baseHref);
 
   Optional<ResolvedInstance> resolveBestInstance(String serviceName);
+
+  Optional<ResolvedInstance> resolveBestInstanceForBaseHref(String requestedUri);
 }
