@@ -24,13 +24,13 @@ public class LoadBalancingService {
   public Optional<InstaceUriWithId> getBestInstanceForBaseHref(String requestedUri) {
     var baseHref = this.getBaseHrefFromURI(requestedUri);
     if (baseHref == null) {
-      log.error("No base href foudn for uri {}", requestedUri);
+      log.error("No base href found for uri {}", requestedUri);
       return Optional.empty();
     }
 
     var instances = this.cache.computeIfAbsent(baseHref, this::fillCacheForBaseHref);
 
-    var bestInstance = instances.poll();
+    var bestInstance = instances.peek();
     if (bestInstance == null) {
       log.error("No instances found for base href {}", baseHref);
       return Optional.empty();
@@ -53,6 +53,7 @@ public class LoadBalancingService {
     var resolvedInstanecs = this.serviceResolverService.resolveForBaseHref(baseHref);
     var queue = new PriorityQueue<UsedResolvedInstance>();
     queue.addAll(resolvedInstanecs.stream().map(UsedResolvedInstance::new).toList());
+    log.info("Done filling cahce with {} instances", resolvedInstanecs.size());
     return queue;
   }
 
